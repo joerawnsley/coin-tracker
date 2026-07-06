@@ -14,7 +14,7 @@ Requires python 3.12 and pip package manager
 
 Clone this repository and navigate to the project root:
 
-```
+```bash
 git clone https://github.com/joerawnsley/coins_api.git
 cd coins_api
 ```
@@ -85,9 +85,12 @@ The Coins API is automatically deployable on AWS using terraform. If you would l
 
 ### Building the infrastructure
 
-Once you have installed Terraform and authenticated using the AWS CLI, run:
+Once you have installed Terraform and authenticated using the AWS CLI, apply the terraform in the infrastructure directory:
 
-`terraform apply`
+```bash
+cd infrastructure
+terraform apply
+```
 
 Check the plan, and type `yes` to accept.
 
