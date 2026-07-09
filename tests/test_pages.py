@@ -70,3 +70,7 @@ def test_duty_list_shows_linked_coins(full_database):
         
     response = client.get("/duties")
     assert "Houston, Prepare to Launch" in response.text
+    
+def test_edit_coin_page_contains_form(full_database):
+    response = client.get("edit-coin/deeper")
+    assert "<form>" in response.text
