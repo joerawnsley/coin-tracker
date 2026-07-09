@@ -1,10 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from src.models import Coin, Duty
 from src.database import db
 from src.utils import coin_to_dict, duty_to_dict
 from pydantic import BaseModel
+from fastapi.templating import Jinja2Templates
+
 
 app = FastAPI()
+templates = Jinja2Templates(directory="src/templates")
 
 # -----welcome endpoint-----
 @app.get("/api")
@@ -139,3 +142,13 @@ def update_duty_description(duty_number, update: DutyUpdate):
 @app.delete("/api/duties/{duty_number}")
 def delete_duty():
     return "Error: Duties are forever. They cannot be deleted."
+
+
+# ------- FRONT END ---------
+
+@app.get("/")
+def welcome_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="welcome.html"
+    )
