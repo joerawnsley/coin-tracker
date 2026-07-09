@@ -151,24 +151,35 @@ def test_remove_duties_from_coin(full_database):
     
 def test_mark_coin_complete(full_database):
     security_coin = Coin.get(Coin.coin_path == "security")
+    assemble_coin = Coin.get(Coin.coin_path == "assemble")
     assert security_coin.is_complete == False
+    assert assemble_coin.is_complete == False
     
     response = client.put("/api/coins/security/mark-complete")
     
     security_coin = Coin.get(Coin.coin_path == "security")
+    assemble_coin = Coin.get(Coin.coin_path == "assemble")
     assert security_coin.is_complete == True
-    assert '"isComplete":true' in response.text
+    assert assemble_coin.is_complete == False
+    assert '"isComplete":true' in response.text    
 
 def test_mark_coin_incomplete(full_database):
     security_coin = Coin.get(Coin.coin_path == "security")
     security_coin.update(is_complete=True).execute()
     security_coin = Coin.get(Coin.coin_path == "security")   
+    assemble_coin = Coin.get(Coin.coin_path == "assemble")
+    assemble_coin.update(is_complete=True).execute()
+    assemble_coin = Coin.get(Coin.coin_path == "assemble") 
+    
     assert security_coin.is_complete == True
+    assert assemble_coin.is_complete == True
     
     response = client.put("/api/coins/security/mark-incomplete")
 
     security_coin = Coin.get(Coin.coin_path == "security")
+    assemble_coin = Coin.get(Coin.coin_path == "assemble")
     assert security_coin.is_complete == False
+    assert assemble_coin.is_complete == True
     assert '"isComplete":false' in response.text
 
 # DELETE /coins
