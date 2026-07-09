@@ -1,6 +1,22 @@
-import pytest, json
+import pytest, json, os
 from src.database import db
 from src.models import Coin, Duty
+from dotenv import load_dotenv
+
+load_dotenv()
+
+if os.getenv("REMOTE_SCHEMA") != "test":
+    pytest.skip(
+        '''
+        
+        TESTING NOT ALLOWED
+        
+        Skipping all tests because REMOTE_SCHEMA is not set to 'test'.
+        
+        ''', 
+        allow_module_level=True
+    )
+
 
 # --------------- test fixtures -----------------
 @pytest.fixture()
