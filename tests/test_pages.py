@@ -35,7 +35,6 @@ def test_coin_list_page_has_title(full_database):
     assert response.status_code == 200
     assert "<h1>" in response.text
     assert "Coins" in response.text
-    pass
     
 def test_coin_list_page_has_content(full_database):
     response = client.get("/coins")
@@ -44,3 +43,9 @@ def test_coin_list_page_has_content(full_database):
     assert "Houston, Prepare" in response.text
     assert "<th>Duties</th>" in response.text
     assert "<th>Complete?</th>" in response.text
+
+def test_duties_list_page_has_title(full_database):
+    response = client.get("/duties")
+    assert response.status_code == 200
+    assert "<h1>" in response.text
+    assert "Duties" in response.text
