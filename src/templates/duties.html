@@ -13,15 +13,11 @@
         <th>Description</th>
         <th>Linked Coins</th>
     </tr>
-    {% for duty in coins %}
+    {% for duty in duties %}
         <tr>
-            <td>{{ coin.coinName }}</td>
-            <td>{{ coin.duties|join(', ') }}</td>
-            {% if coin.isComplete %}
-                <td>Yes</td>
-            {% else %}
-                <td>No</td>
-            {% endif %}
+            <td>Duty {{ duty.dutyNumber }}</td>
+            <td>Duty {{ duty.description }}</td>
+            <td>{{ duty.coins|join(', ') }}</td>
         </tr>
     {% endfor %}   
 </table>
