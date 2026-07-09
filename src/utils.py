@@ -20,5 +20,6 @@ def duty_to_dict(duty):
     return dict(
         id = duty.id,
         dutyNumber = duty.duty_number,
-        description = duty.description
+        description = duty.description,
+        coins = set([coin.coin_name for coin in duty.coins])
     )
