@@ -14,16 +14,17 @@
     </tr>
     {% for coin in coins %}
         <tr>
-            <td>{{ coin.coinName }}</td>
+            <td><a href="/edit-coin/{{coin.coinPath}}">{{ coin.coinName }}</a></td>
             <td>{{ coin.duties|join(', ') }}</td>
             {% if coin.isComplete %}
                 <td>Yes</td>
             {% else %}
                 <td>No</td>
-            {% endif %}
+            {% endif %}           
         </tr>
     {% endfor %}   
 </table>
+<br>
+<a href="#">Create New Coin</a>
 
 {% endblock %}
-
