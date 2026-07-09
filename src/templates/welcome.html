@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Joe's Coins</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Joe's Coins - Welcome{% endblock %}
+
+{% block content %}
+
 <h1>Welcome to Joe's Coins</h1>
 <p>Please select a subpage from the options below:</p>
 
@@ -15,5 +14,8 @@
         {% endfor %}
     </ul>
 </nav>
-</body>
-</html>
+
+{% endblock %}
+
+
+
