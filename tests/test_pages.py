@@ -49,3 +49,12 @@ def test_duties_list_page_has_title(full_database):
     assert response.status_code == 200
     assert "<h1>" in response.text
     assert "Duties" in response.text
+
+def test_duty_list_page_has_content(full_database):
+    response = client.get("/duties")
+    assert "<table>" in response.text
+    assert "Duty 3" in response.text
+    assert "Script and code" in response.text
+    assert "you build it, you run it" in response.text
+    assert "<th>Description</th>" in response.text
+    assert "Coins" in response.text
