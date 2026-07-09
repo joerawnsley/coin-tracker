@@ -30,8 +30,17 @@ def test_welcome_page_contains_links():
     
 # ----- list coins page -----
 
-def test_coin_list_page_has_title():
+def test_coin_list_page_has_title(full_database):
     response = client.get("/coins")
     assert response.status_code == 200
     assert "<h1>" in response.text
     assert "Coins" in response.text
+    pass
+    
+def test_coin_list_page_has_content(full_database):
+    response = client.get("/coins")
+    assert "<table>" in response.text
+    assert "Assemble" in response.text
+    assert "Houston, Prepare" in response.text
+    assert "<th>Duties</th>" in response.text
+    assert "<th>Complete?</th>" in response.text
