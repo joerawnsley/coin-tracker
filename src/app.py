@@ -7,11 +7,11 @@ from pydantic import BaseModel
 app = FastAPI()
 
 # -----welcome endpoint-----
-@app.get("/")
+@app.get("/api")
 def root():
     return {"message": "Welcome to the Coins API"}
 
-# -----coin routes-----
+# ---- input models ---
 
 class NewCoin(BaseModel):
     coin_name: str
@@ -27,6 +27,7 @@ class DutyUpdate(BaseModel):
     duty_number: int | None = None
     description: str
 
+# -----coin routes-----
 
 @app.get("/coins")
 def list_coins():
