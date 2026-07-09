@@ -103,7 +103,7 @@ def list_coin_duties(coin_path):
 
 # -----duties routes-----
 
-@app.get("/duties")
+@app.get("/api/duties")
 def list_duties():
     print("hello from listduties")
     query = Duty.select()
@@ -112,12 +112,12 @@ def list_duties():
         duty_list.append(duty_to_dict(duty))
     return duty_list
 
-@app.get("/duties/{duty_number}")
+@app.get("/api/duties/{duty_number}")
 def single_duty(duty_number):
     selected_duty = Duty.get(Duty.duty_number == duty_number)
     return duty_to_dict(selected_duty)
 
-@app.post("/duties", status_code=201)
+@app.post("/api/duties", status_code=201)
 def add_duty(duty: NewDuty):
     Duty.create(
         duty_number = duty.duty_number,
@@ -126,7 +126,7 @@ def add_duty(duty: NewDuty):
     created_duty = Duty.get(Duty.duty_number == duty.duty_number)
     return duty_to_dict(created_duty)
 
-@app.put("/duties/{duty_number}/update")
+@app.put("/api/duties/{duty_number}/update")
 def update_duty_description(duty_number, update: DutyUpdate):
     selected_duty = Duty.get(Duty.duty_number == duty_number)
     if update.duty_number != selected_duty.duty_number and update.duty_number is not None:
@@ -136,6 +136,6 @@ def update_duty_description(duty_number, update: DutyUpdate):
     selected_duty.save(only=[Duty.description])
     return selected_duty
 
-@app.delete("/duties/{duty_number}")
+@app.delete("/api/duties/{duty_number}")
 def delete_duty():
     return "Error: Duties are forever. They cannot be deleted."
