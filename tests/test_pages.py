@@ -16,7 +16,7 @@ client = TestClient(app)
 def test_welcome_page_returns_message():
     response = client.get("/")
     assert response.status_code == 200
-    assert "Welcome" in response.text
+    assert "Please select" in response.text
 
 def test_welcome_page_returns_html_page():
     response = client.get("/")
@@ -35,7 +35,7 @@ def test_welcome_page_contains_links():
 def test_coin_list_page_has_title(full_database):
     response = client.get("/coins")
     assert response.status_code == 200
-    assert "<h1>" in response.text
+    assert "<h2>" in response.text
     assert "Coins" in response.text
     
 def test_coin_list_page_has_content(full_database):
@@ -49,8 +49,8 @@ def test_coin_list_page_has_content(full_database):
 def test_duties_list_page_has_title(full_database):
     response = client.get("/duties")
     assert response.status_code == 200
-    assert "<h1>" in response.text
-    assert "Duties" in response.text
+    assert "list of all duties" in response.text
+    assert "<h2>" in response.text
 
 def test_duty_list_page_has_content(full_database):
     response = client.get("/duties")
