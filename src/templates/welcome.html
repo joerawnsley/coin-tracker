@@ -1,0 +1,10 @@
+<h1>Welcome to Joe's Coins</h1>
+<p>Please select a subpage from the options below:</p>
+
+<nav>
+    <ul>
+        {% for page in subpages %}
+        <li><a href="{{ url_for(page.endpoint) }}">{{ page.title }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>
