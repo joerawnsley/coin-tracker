@@ -1,6 +1,8 @@
 from src.app import app
+from src.models import Coin, Duty
 from fastapi.testclient import TestClient
 import os, logging
+
 
 if os.getenv('DB_LOGGING') == 'on':
     logging.getLogger('peewee').addHandler(logging.StreamHandler())
@@ -58,3 +60,13 @@ def test_duty_list_page_has_content(full_database):
     assert "you build it, you run it" in response.text
     assert "<th>Description</th>" in response.text
     assert "Coins" in response.text
+    
+def test_duty_list_shows_linked_coins(full_database):
+    houston = Coin.get(Coin.coin_name == "Houston, Prepare to Launch")  
+    duty_5 = Duty.get(Duty.duty_number == 5)
+    duty_7 = Duty.get(Duty.duty_number == 7)
+    duty_10 = Duty.get(Duty.duty_number == 10)
+    houston.duties.add([duty_5, duty_7, duty_10])
+        
+    response = client.get("/duties")
+    assert "Houston, Prepare to Launch" in response.text
