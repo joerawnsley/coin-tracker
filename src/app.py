@@ -173,5 +173,12 @@ def coins_list_page(request: Request):
     )
 
 @app.get("/duties")
-def duties_list_page(request: Request):
-    pass
+def duties_list_page(request: Request, response_class=HTMLResponse):
+    duties = list_duties()
+    return templates.TemplateResponse(
+        request=request,
+        name="duties.html",
+        context={
+            "duties": duties
+        }
+    )
