@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from src.models import Coin, Duty
 from src.database import db
 from src.utils import coin_to_dict, duty_to_dict
 from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
-
 
 app = FastAPI()
 templates = Jinja2Templates(directory="src/templates")
@@ -108,7 +108,6 @@ def list_coin_duties(coin_path):
 
 @app.get("/api/duties")
 def list_duties():
-    print("hello from listduties")
     query = Duty.select()
     duty_list = []
     for duty in query:
@@ -164,13 +163,14 @@ def welcome_page(request: Request):
         }
     )
 
-@app.get("/coins")
+@app.get("/coins", response_class=HTMLResponse)
 def coins_list_page(request: Request):
+    coins = list_coins()
     return templates.TemplateResponse(
         request=request,
         name="coins.html",
         context={
-            
+            "coins": coins
         }
     )
 
