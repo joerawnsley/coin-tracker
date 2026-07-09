@@ -3,17 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <title>All Coins</title>
+    <style>
+        table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        }
+
+        td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+        }
+
+        tr:nth-child(even) {
+        background-color: #dddddd;
+        }
+</style>
 </head>
 <body>
 <h1>All Coins</h1>
 <p>Below is a list of all coins currently in the database:</p>
 
-<nav>
-    <ul>
-        {% for page in subpages %}
-        <li><a href="{{ url_for(page.endpoint) }}">{{ page.title }}</a></li>
-        {% endfor %}
-    </ul>
+<table>
+    <tr>
+        <th>Coin Name</th>
+        <th>Duties</th>
+        <th>Complete?</th>
+    </tr>
+    {% for coin in coins %}
+        <tr>
+            <td>{{ coin.coinName }}</td>
+            <td>{{ coin.duties|join(', ') }}</td>
+            {% if coin.isComplete %}
+                <td>Yes</td>
+            {% else %}
+                <td>No</td>
+            {% endif %}
+        </tr>
+    {% endfor %}   
+</table>
 </nav>
 </body>
 </html>
