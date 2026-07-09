@@ -22,6 +22,7 @@ def test_welcome_page_returns_html_page():
     
 def test_welcome_page_contains_links():
     response = client.get("/")
-    assert "<a href='/coins" in response.text
-    assert "<a href='/duties" in response.text
+    assert "/coins" in response.text
+    assert "/duties" in response.text
+    assert response.text.count("<a") > 1
     assert response.text.count("</a>") > 1

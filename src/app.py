@@ -148,7 +148,26 @@ def delete_duty():
 
 @app.get("/")
 def welcome_page(request: Request):
+    subpages = [
+        {"title": "All Coins",
+         "endpoint": "coins_list_page"
+        },
+        {"title": "All Duties",
+         "endpoint": "duties_list_page"
+        }
+    ]
     return templates.TemplateResponse(
         request=request,
-        name="welcome.html"
+        name="welcome.html",
+        context={
+            "subpages": subpages
+        }
     )
+
+@app.get("/coins")
+def coins_list_page(request: Request):
+    pass
+
+@app.get("/duties")
+def duties_list_page(request: Request):
+    pass
