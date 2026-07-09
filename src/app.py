@@ -143,8 +143,8 @@ def delete_duty():
 
 # ------- FRONT END ---------
 
-@app.get("/")
-def welcome_page(request: Request, response_class=HTMLResponse):
+@app.get("/", response_class=HTMLResponse)
+def welcome_page(request: Request):
     subpages = [
         {"title": "All Coins",
          "endpoint": "coins_list_page"
@@ -172,13 +172,26 @@ def coins_list_page(request: Request):
         }
     )
 
-@app.get("/duties")
-def duties_list_page(request: Request, response_class=HTMLResponse):
+@app.get("/duties", response_class=HTMLResponse)
+def duties_list_page(request: Request):
     duties = list_duties()
     return templates.TemplateResponse(
         request=request,
         name="duties.html",
         context={
             "duties": duties
+        }
+    )
+
+@app.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
+def edit_coin_page(request: Request, coin_path: str):
+    selected_coin = single_coin(coin_path)
+    all_duties = list_duties()
+    return templates.TemplateResponse(
+        request=request,
+        name="edit-coin.html",
+        context={
+            "coin": selected_coin,
+            "duties": all_duties
         }
     )
