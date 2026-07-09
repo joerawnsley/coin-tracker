@@ -83,15 +83,13 @@ def remove_duty_from_coin(coin_path, duties: list[int]):
 
 @app.put("/api/coins/{coin_path}/mark-complete")
 def mark_coin_complete(coin_path):
-    selected_coin = Coin.get(Coin.coin_path == coin_path)
-    selected_coin.update(is_complete=True).execute()
+    Coin.update({Coin.is_complete: True}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
 @app.put("/api/coins/{coin_path}/mark-incomplete")
 def mark_coin_incomplete(coin_path):
-    selected_coin = Coin.get(Coin.coin_path == coin_path)
-    selected_coin.update(is_complete=False).execute()
+    Coin.update({Coin.is_complete: False}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
