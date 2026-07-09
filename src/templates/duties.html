@@ -16,7 +16,7 @@
     {% for duty in duties %}
         <tr>
             <td>Duty {{ duty.dutyNumber }}</td>
-            <td>Duty {{ duty.description }}</td>
+            <td>{{ duty.description }}</td>
             <td>{{ duty.coins|join(', ') }}</td>
         </tr>
     {% endfor %}   
