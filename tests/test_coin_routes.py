@@ -16,30 +16,30 @@ client = TestClient(app)
 # ----- GET /coins -----
 
 def test_coins_route_returns_a_list(full_database):
-    response = client.get("/coins")
+    response = client.get("/api/coins")
     data = response.json()
     assert isinstance(data, list)
 
 def test_coins_route_returns_5_coins(full_database):
-    response = client.get("/coins")
+    response = client.get("/api/coins")
     coin_list = response.json()
     assert len(coin_list) == 5
     
 def test_first_coin_has_coin_name_and_id(full_database):
-    response = client.get("/coins")
+    response = client.get("/api/coins")
     first_coin = response.json()[0]
     assert 'coinName' in first_coin
     assert 'id' in first_coin
 
 def test_all_coins_have_coin_name_and_id(full_database):
-    response = client.get("/coins")
+    response = client.get("/api/coins")
     coin_list = response.json()
     for coin in coin_list:
         assert 'coinName' in coin
         assert 'id' in coin
 
 def test_data_types_in_coin(full_database):
-    response = client.get("/coins")
+    response = client.get("/api/coins")
     coin_3 = response.json()[3]
     assert type(coin_3['coinName'] == str)
     assert is_valid_uuid(coin_3['id'])
@@ -47,8 +47,8 @@ def test_data_types_in_coin(full_database):
     assert type(coin_3['isComplete']) == bool
 
 def test_list_duties_for_coin(full_database):
-    client.put('/coins/deeper/add-duties', json=[10, 11, 12])
-    response = client.get('coins/deeper/list-duties')
+    client.put('/api/coins/deeper/add-duties', json=[10, 11, 12])
+    response = client.get('/api/coins/deeper/list-duties')
     
     assert len(response.json()) == 3
     for number in ["10", "11", "12"]:
@@ -67,7 +67,7 @@ def test_add_coin_with_no_duties_to_empty_db(empty_database):
         "coin_name": "Going Deeper",
         "coin_path": "deeper",
     }
-    response = client.post("/coins", json=coin_data)
+    response = client.post("/api/coins", json=coin_data)
     
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == 'deeper').first() is not None
@@ -82,7 +82,7 @@ def test_add_coin_with_duties(db_with_duties_but_no_coins):
         "coin_path": "deeper",
         "duties": ["11", "12"]
     }
-    response = client.post("/coins", json=coin_data)
+    response = client.post("/api/coins", json=coin_data)
     
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == 'deeper').first() is not None
@@ -99,7 +99,7 @@ def test_coin_detail_page_gets_a_single_coin(full_database):
     duty_8 = Duty.get(Duty.duty_number == 8)
     assemble_coin.duties.add(duty_8)
     
-    response = client.get("/coins/assemble")
+    response = client.get("/api/coins/assemble")
     data = response.json()
     
     assert type(data) == dict
@@ -113,7 +113,7 @@ def test_add_coin_returns_201(db_with_duties_but_no_coins):
         "coin_path": "deeper",
         "duties": ["11", "12"]
     }
-    response = client.post("/coins", json=coin_data)
+    response = client.post("/api/coins", json=coin_data)
     
     assert response.status_code == 201
     
@@ -125,7 +125,7 @@ def test_add_duty_to_coin(full_database):
     assert automate_coin.duties == set([])
     
     client.put(
-        "/coins/automate/add-duties", 
+        "/api/coins/automate/add-duties", 
         json = [1, 2, 3])
     
     automate_coin = Coin.get(Coin.coin_path == 'automate')
@@ -142,7 +142,7 @@ def test_remove_duties_from_coin(full_database):
     assert houston_duties == set([5, 7, 10])
     
     client.put(
-        "/coins/houston/remove-duties", 
+        "/api/coins/houston/remove-duties", 
         json = [5, 7])
     
     houston = Coin.get(Coin.coin_name == "Houston, Prepare to Launch")
@@ -153,7 +153,7 @@ def test_mark_coin_complete(full_database):
     security_coin = Coin.get(Coin.coin_path == "security")
     assert security_coin.is_complete == False
     
-    response = client.put("/coins/security/mark-complete")
+    response = client.put("/api/coins/security/mark-complete")
     
     security_coin = Coin.get(Coin.coin_path == "security")
     assert security_coin.is_complete == True
@@ -165,7 +165,7 @@ def test_mark_coin_incomplete(full_database):
     security_coin = Coin.get(Coin.coin_path == "security")   
     assert security_coin.is_complete == True
     
-    response = client.put("/coins/security/mark-incomplete")
+    response = client.put("/api/coins/security/mark-incomplete")
 
     security_coin = Coin.get(Coin.coin_path == "security")
     assert security_coin.is_complete == False
@@ -176,7 +176,7 @@ def test_delete_coin(full_database):
     coins_in_db = set([coin.coin_name for coin in Coin.select()])
     assert coins_in_db == {'Automate', 'Houston, Prepare to Launch', 'Going Deeper', 'Assemble', 'Call Security'}
     
-    response = client.delete("/coins/security")
+    response = client.delete("/api/coins/security")
     
     coins_in_db = set([coin.coin_name for coin in Coin.select()])
     assert coins_in_db == {'Automate', 'Houston, Prepare to Launch', 'Going Deeper', 'Assemble'}

@@ -29,7 +29,7 @@ class DutyUpdate(BaseModel):
 
 # -----coin routes-----
 
-@app.get("/coins")
+@app.get("/api/coins")
 def list_coins():
     query = Coin.select()
     coin_list = []
@@ -37,7 +37,7 @@ def list_coins():
         coin_list.append(coin_to_dict(coin))
     return coin_list
 
-@app.post("/coins", status_code=201)
+@app.post("/api/coins", status_code=201)
 def add_coin(coin: NewCoin):
     Coin.create(
         coin_name=coin.coin_name,
@@ -52,18 +52,18 @@ def add_coin(coin: NewCoin):
     return coin_to_dict(created_coin)
     
 
-@app.get("/coins/{coin_path}")
+@app.get("/api/coins/{coin_path}")
 def single_coin(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(selected_coin)
 
-@app.delete("/coins/{coin_path}")
+@app.delete("/api/coins/{coin_path}")
 def delete_coin(coin_path):
     Coin.delete().where(Coin.coin_path == coin_path).execute()
     return "Coin deleted"
 
 # for adding and removing duties from coins
-@app.put("/coins/{coin_path}/add-duties")
+@app.put("/api/coins/{coin_path}/add-duties")
 def add_duty_to_coin(coin_path, duties: list[int]):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
@@ -71,28 +71,28 @@ def add_duty_to_coin(coin_path, duties: list[int]):
     return coin_to_dict(selected_coin)
 
 
-@app.put("/coins/{coin_path}/remove-duties")
+@app.put("/api/coins/{coin_path}/remove-duties")
 def remove_duty_from_coin(coin_path, duties: list[int]):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
         selected_coin.duties.remove(Duty.get(Duty.duty_number == number))
     return coin_to_dict(selected_coin)
 
-@app.put("/coins/{coin_path}/mark-complete")
+@app.put("/api/coins/{coin_path}/mark-complete")
 def mark_coin_complete(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     selected_coin.update(is_complete=True).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
-@app.put("/coins/{coin_path}/mark-incomplete")
+@app.put("/api/coins/{coin_path}/mark-incomplete")
 def mark_coin_incomplete(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     selected_coin.update(is_complete=False).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
-@app.get("/coins/{coin_path}/list-duties")
+@app.get("/api/coins/{coin_path}/list-duties")
 def list_coin_duties(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     duties_list = []
