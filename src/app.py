@@ -166,7 +166,13 @@ def welcome_page(request: Request):
 
 @app.get("/coins")
 def coins_list_page(request: Request):
-    pass
+    return templates.TemplateResponse(
+        request=request,
+        name="coins.html",
+        context={
+            
+        }
+    )
 
 @app.get("/duties")
 def duties_list_page(request: Request):

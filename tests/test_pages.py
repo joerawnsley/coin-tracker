@@ -9,7 +9,7 @@ if os.getenv('DB_LOGGING') == 'on':
 # ------------ create test client ----------------
 client = TestClient(app)
 
-# ----- welcome endpoint -----
+# ----- welcome page -----
 
 def test_welcome_page_returns_message():
     response = client.get("/")
@@ -26,3 +26,12 @@ def test_welcome_page_contains_links():
     assert "/duties" in response.text
     assert response.text.count("<a") > 1
     assert response.text.count("</a>") > 1
+    
+    
+# ----- list coins page -----
+
+def test_coin_list_page_has_title():
+    response = client.get("/coins")
+    assert response.status_code == 200
+    assert "<h1>" in response.text
+    assert "Coins" in response.text
