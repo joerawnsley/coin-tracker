@@ -10,6 +10,8 @@ if os.getenv('DB_LOGGING') == 'on':
 
 # -------- connection test --------
 def test_connection():
+    if not db.is_closed():
+        db.close()
     connection = db.connect()
     assert connection
     if not db.is_closed():
