@@ -73,4 +73,4 @@ def test_duty_list_shows_linked_coins(full_database):
     
 def test_edit_coin_page_contains_form(full_database):
     response = client.get("edit-coin/deeper")
-    assert "<form>" in response.text
+    assert "<form" in response.text
