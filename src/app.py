@@ -220,5 +220,13 @@ def edit_coin_submit(
             status_code=status.HTTP_303_SEE_OTHER
         )
     
-    
-    
+@app.get("/create-coin", response_class=HTMLResponse)
+def edit_coin_page(request: Request):
+    all_duties = list_duties()
+    return templates.TemplateResponse(
+        request=request,
+        name="create-coin.html",
+        context={
+            "duties": all_duties
+        }
+    )
