@@ -100,5 +100,3 @@ def test_create_coin_page_contains_form(full_database):
     assert "name" in response.text
     assert "path" in response.text
     assert "submit" in response.text
-
-    
