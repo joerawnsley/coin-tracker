@@ -93,4 +93,12 @@ def test_update_and_redirect_on_submit(full_database):
     assert response.status_code == 303
     assert response.headers["location"] == "/coins"
 
+
+def test_create_coin_page_contains_form(full_database):
+    response = client.get("/create-coin")
+    assert "<form" in response.text
+    assert "name" in response.text
+    assert "path" in response.text
+    assert "submit" in response.text
+
     
