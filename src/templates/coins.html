@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<p>Below is a list of all coins currently in the database:</p>
-
+<p>Below is a list of all coins currently in the database.</p>
+<p>Click on a coin's name to edit its duties or completion status</p>
 <table>
     <tr>
         <th>Coin Name</th>
@@ -17,14 +17,14 @@
             <td><a href="/edit-coin/{{coin.coinPath}}">{{ coin.coinName }}</a></td>
             <td>{{ coin.duties|join(', ') }}</td>
             {% if coin.isComplete %}
-                <td>Yes</td>
+                <td style="color: green"; ><b>Yes</b></td>
             {% else %}
-                <td>No</td>
+                <td style="color: red"; ><b>No</b></td>
             {% endif %}           
         </tr>
     {% endfor %}   
 </table>
 <br>
-<a href="#">Create New Coin</a>
+<a href="#" style="color: black">Create New Coin</a>
 
 {% endblock %}
