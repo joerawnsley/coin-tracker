@@ -6,7 +6,7 @@
 
 <p>Edit details for the <b>{{ coin.coinName }}</b> coin</p>
 
-<form action="/update-coin" method="POST" class="coin-edit-form">
+<form action="/edit-coin/{{ coin.coinPath }}" method="POST" class="coin-edit-form">
 
   <!-- Path - Uneditable) -->
   <div class="form-group">
@@ -21,14 +21,15 @@
     >
   </div>
 
-  <!-- Name (Editable) -->
+  <!-- Name (Uneditable) -->
   <div class="form-group">
     <label for="coin-name">Coin Name</label>
     <input 
       type="text" 
       id="coin-name" 
       name="name" 
-      value="{{coin.coinName}}" 
+      value="{{coin.coinName}}"
+      disabled 
       required
     >
   </div>

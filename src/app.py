@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from fastapi import FastAPI, Request, Form, status
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from src.models import Coin, Duty
 from src.database import db
 from src.utils import coin_to_dict, duty_to_dict
 from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
+from typing import Annotated
 
 app = FastAPI()
 templates = Jinja2Templates(directory="src/templates")
@@ -195,3 +196,30 @@ def edit_coin_page(request: Request, coin_path: str):
             "duties": all_duties
         }
     )
+
+@app.post("/edit-coin/{coin_path}")
+def edit_coin_submit(
+        request: Request, 
+        coin_path: str,
+        duties: Annotated[list[int], Form()] = [],
+        completed: Annotated[bool, Form()] = False
+    ):
+    original_coin = single_coin(coin_path)
+    original_duties = original_coin["duties"]
+    original_status = original_coin["isComplete"]
+    
+    remove_duty_from_coin(coin_path, original_duties)
+    add_duty_to_coin(coin_path, duties)
+    
+    if completed and not original_status:
+        mark_coin_complete(coin_path)
+    if original_status and not completed:
+        mark_coin_incomplete(coin_path)
+    
+    return RedirectResponse(
+            url="/coins",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+    
+    
+    
