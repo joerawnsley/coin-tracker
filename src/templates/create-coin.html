@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Joe's Coins - Edit Coin{% endblock %}
+
+{% block content %}
+
+<form action="/create-coin" method="POST" class="coin-create-form">
+
+  <!-- Path -->
+  <div class="form-group">
+    <label for="coin-path">Coin Path</label>
+    <input 
+      type="text" 
+      id="coin-path" 
+      name="path" 
+      placeholder="a short name for your coin (lowercase)" 
+      aria-describedby="path-help"
+      required
+    >
+  </div>
+
+  <!-- Name -->
+  <div class="form-group">
+    <label for="coin-name">Coin Name</label>
+    <input 
+      type="text" 
+      id="coin-name" 
+      name="name" 
+      placeholder="The full name of your coin" 
+      required
+    >
+  </div>
+
+  <!-- Duties (Selection) -->
+<div class="form-group">
+  <label>Duties for this coin:</label>
+  
+  <div class="checkbox-list-box" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px;">
+    {% for duty in duties %}
+      <div class="checkbox-item" style="margin-bottom: 8px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input 
+            type="checkbox" 
+            name="duties" 
+            value="{{ duty.dutyNumber }}"
+          >
+          <span><b>Duty {{ duty.dutyNumber }}:</b> {{duty.description}}</span>
+        </label>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+  <!-- Form Actions -->
+  <div class="form-actions">
+    <button type="submit" class="btn-save">Save Changes</button>
+    <button type="button" class="btn-cancel" onclick="window.history.back()">Cancel</button>
+
+</form>
+
+
+
+{% endblock %}
