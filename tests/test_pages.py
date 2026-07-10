@@ -78,12 +78,17 @@ def test_edit_coin_page_contains_form(full_database):
     assert "path" in response.text
     assert "submit" in response.text
 
-def test_redirect_on_submit(full_database):
+def test_update_and_redirect_on_submit(full_database):
     updates = {
         "duties": [5, 7, 10],
         "completed": "true"
     }
     response = client.post("/edit-coin/houston", data=updates, follow_redirects=False)
+    
+    houston_coin = Coin.get(Coin.coin_path == "houston")
+    houston_duties = set([duty.duty_number for duty in houston_coin.duties])
+    assert houston_duties == set([5, 7, 10])
+    assert houston_coin.is_complete == True
     
     assert response.status_code == 303
     assert response.headers["location"] == "/coins"
