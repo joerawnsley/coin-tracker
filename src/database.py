@@ -13,7 +13,9 @@ remote_postgres_db = PostgresqlDatabase(
 
 sqlite_db = SqliteDatabase('local.db')
 
-if os.getenv('DB_LOCATION') == 'remote':
+if os.getenv('DB_ENVIRONMENT') == 'ltest':
+    db = sqlite_db   
+if os.getenv('DB_ENVIRONMENT') == 'rtest':
     db = remote_postgres_db
-if os.getenv('DB_LOCATION') == 'local':
-    db = sqlite_db
+if os.getenv('DB_ENVIRONMENT') == 'prod':
+    db = remote_postgres_db

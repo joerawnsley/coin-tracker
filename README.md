@@ -36,25 +36,26 @@ Create a .env file in the project root, and paste in the following text, replaci
 ```
 DB_HOST=[your Digital Ocean connection string]
 DB_PASSWORD=[your Digital Ocean DB passowrd]
-DB_LOCATION=remote
-REMOTE_SCHEMA=prod
+DB_ENVIRONMENT=prod
 DB_LOGGING=off
 ```
 
-- DB_LOCATION can be set to 'local' allowing you to run the tests against a local sqlite database for speed, or 'remote', allowing you to use your hosted cloud database
-- REMOTE_SCHEMA can be 'test' or 'prod'. If DB_LOCATION is 'remote', 'test' will let you run automated tests against the cloud database, while 'prod' will let you run the server and send requests manually
+- DB_ENVIRONMENT can be set to the following values:
+  - `prod` to use the production database with persistent storage for deployment or manual testing
+  - `ltest` (local test) for quick automated testing using an in-memory database
+  - `rtest` (remote test) for testing using the remote PSQL database
 - DB_LOGGING= can be 'on' to show detailed database query logging during tests, 'off' to not show
 
 ### Running the tests
 
-To run the tests, ensure REMOTE_SCHEMA is set to `test` in you .env file. Run
+To run the tests, ensure DB_ENVIRONMENT is set to `ltest` or `rtest` in you .env file. Run
 
 `pytest`
 
 in the terminal.
 
-- Do not run tests when remote schema is set to 'prod'
-- DB_LOCATION in the .env file can be set to 'local' allowing you to run the tests against a local sqlite database for speed, or 'remote', allowing you to run the same tests using your hosted cloud database
+- Do not run tests when database environment is set to 'prod'
+- DB_ENVIRONMENT in the .env file can be set to `ltest` allowing you to run the tests against a local sqlite database for speed, or `rtest`, allowing you to run the same tests using your hosted cloud database
 
 Overall test coverage is 96%. To check coverage, run ```pytest --cov``` from the project root.
 

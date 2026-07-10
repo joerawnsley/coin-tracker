@@ -7,15 +7,17 @@ dotenv.load_dotenv()
 test_schema = 'coins-dev'
 prod_schema = 'coins-prod'
 
-if os.getenv('REMOTE_SCHEMA') == 'prod':
+if os.getenv('DB_ENVIRONMENT') == 'prod':
     current_schema = prod_schema
-if os.getenv('REMOTE_SCHEMA') == 'test':
+elif os.getenv('DB_ENVIRONMENT') in ['ltest', 'rtest'] :
     current_schema = test_schema
+else:
+    raise ValueError("Please ensure you have a .env file with DB_ENVIRONMENT set to 'ltest', 'rtest' or 'prod'")
 
 class BaseModel(Model):
     class Meta:
         database = db
-        if os.getenv('DB_LOCATION') == 'remote':
+        if os.getenv('DB_ENVIRONMENT') in ['rtest', 'prod']:
             schema = current_schema
 
 class Duty(BaseModel):

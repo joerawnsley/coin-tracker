@@ -100,7 +100,6 @@ def list_coin_duties(coin_path):
     duties_list = []
     for duty in selected_coin.duties:
         duties_list.append(duty_to_dict(duty))
-    print(duties_list)
     return duties_list
 
 # -----duties routes-----

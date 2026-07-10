@@ -2,12 +2,10 @@ import json, os
 from src.database import db
 from src.models import Coin, Duty
 
-db_location = os.getenv('DB_LOCATION')
-remote_schema = os.getenv('REMOTE_SCHEMA')
+db_environment = os.getenv('DB_ENVIRONMENT')
 
-if not (db_location == 'remote' and remote_schema == 'prod'):
-    raise Exception('must set db location to remote and remote schema to prod before seeding')
-
+if not db_environment == 'prod':
+    raise Exception('must set db environment to prod before seeding')
 
 with open('seed_data/seed_data.json') as json_data:
     seed_data = json.load(json_data)

@@ -1,21 +1,21 @@
-import pytest, json, os
+import pytest, json, os, dotenv
 from src.database import db
 from src.models import Coin, Duty
-from dotenv import load_dotenv
 
-load_dotenv()
-
-if os.getenv("REMOTE_SCHEMA") != "test":
+dotenv.load_dotenv()
+    
+if os.getenv("DB_ENVIRONMENT") == "prod":
     pytest.skip(
         '''
         
         TESTING NOT ALLOWED
         
-        Skipping all tests because REMOTE_SCHEMA is not set to 'test'.
+        DB_ENVIRONMENT in .env must be set to 'ltest' or 'rtest' before running tests 
         
         ''', 
         allow_module_level=True
     )
+
 
 
 # --------------- test fixtures -----------------

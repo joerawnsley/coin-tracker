@@ -97,7 +97,7 @@ def test_duty_with_same_number_not_allowed(full_database):
     with pytest.raises(peewee.IntegrityError) as error:
         Duty.insert(duty_number=1, description='Script and code').execute()
     
-    if os.getenv('DB_LOCATION') == 'remote':
+    if os.getenv('DB_ENVIRONMENT') in ['rtest', 'prod']:
         db.rollback()
     
     assert 'unique constraint' in str(error.value).lower()
@@ -109,7 +109,7 @@ def test_coin_with_same_name_not_allowed(full_database):
         # should raise an error
         Coin.insert(coin_name='Automate', coin_path='automate').execute()
     
-    if os.getenv('DB_LOCATION') == 'remote':
+    if os.getenv('DB_ENVIRONMENT') in ['rtest', 'prod']:
         db.rollback()
     
     assert 'unique constraint' in str(error.value).lower()

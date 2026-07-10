@@ -11,8 +11,9 @@ permissions:
     id-token: write
 
 env:
-  DB_LOCATION: local
-  REMOTE_SCHEMA: test
+  # DB_LOCATION: local
+  # REMOTE_SCHEMA: test
+  DB_ENVIRONMENT: ltest
   DB_LOGGING: off
 
 # also dockerfile should set up virtual environment
@@ -64,9 +65,14 @@ jobs:
               task-definition: .github/workflows/ecs_task.json
               container-name: coins-api-server
               image: 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coins-api:latest
+              # environment-variables: |
+              #   DB_LOCATION=remote
+              #   REMOTE_SCHEMA=prod
+              #   DB_LOGGING=off
+              #   DB_HOST=${{ secrets.DB_HOST }}
+              #   DB_PASSWORD=${{ secrets.DB_PASSWORD }}
               environment-variables: |
-                DB_LOCATION=remote
-                REMOTE_SCHEMA=prod
+                DB_ENVIRONMENT=prod
                 DB_LOGGING=off
                 DB_HOST=${{ secrets.DB_HOST }}
                 DB_PASSWORD=${{ secrets.DB_PASSWORD }}
