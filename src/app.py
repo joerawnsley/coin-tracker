@@ -183,6 +183,17 @@ def duties_list_page(request: Request):
         }
     )
 
+@app.get("/duties/{duty_number}", response_class=HTMLResponse)
+def single_duty_page(duty_number: int, request: Request):
+    duties = [single_duty(duty_number)]
+    return templates.TemplateResponse(
+        request=request,
+        name="duties.html",
+        context={
+            "duties": duties
+        }
+    )
+
 @app.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
 def edit_coin_page(request: Request, coin_path: str):
     selected_coin = single_coin(coin_path)
