@@ -243,3 +243,22 @@ def create_coin_page(request: Request):
             "duties": all_duties
         }
     )
+
+@app.post("/create-coin")
+def create_coin_submit(
+        coin_path: str = Form(),
+        coin_name: str = Form(),
+        duties: Annotated[list[int], Form()] = [],
+    ):
+    new_coin = NewCoin(
+        coin_name=coin_name,
+        coin_path=coin_path,
+        duties=duties
+    )
+    
+    add_coin(new_coin)
+    
+    return RedirectResponse(
+            url="/coins",
+            status_code=status.HTTP_303_SEE_OTHER
+        )

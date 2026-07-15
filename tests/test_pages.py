@@ -111,10 +111,10 @@ def test_single_duty_page_dispalys_specified_duty(full_database):
     assert "<th>Description</th>" in response.text
     assert "Coins" in response.text
     
-def test_post_create_coin_and_redirect(empty_database):
+def test_post_create_coin_and_redirect(full_database):
     coin_data = {
-        "path": "fiftypence",
-        "name": "50 Pence",
+        "coin_path": "fiftypence",
+        "coin_name": "50 Pence",
         "duties": [12]
     }
     response = client.post("/create-coin", data=coin_data, follow_redirects=False)
