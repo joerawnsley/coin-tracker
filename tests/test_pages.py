@@ -103,7 +103,6 @@ def test_create_coin_page_contains_form(full_database):
 
 def test_single_duty_page_dispalys_specified_duty(full_database):
     response = client.get("/duties/6")
-    print(response.text)
     assert "<table" in response.text
     assert "Duty 6" in response.text
     assert "continuous delivery" in response.text
@@ -111,3 +110,20 @@ def test_single_duty_page_dispalys_specified_duty(full_database):
     assert "Script and code" not in response.text
     assert "<th>Description</th>" in response.text
     assert "Coins" in response.text
+    
+def test_post_create_coin_and_redirect(empty_database):
+    coin_data = {
+        "path": "fiftypence",
+        "name": "50 Pence",
+        "duties": [12]
+    }
+    response = client.post("/create-coin", data=coin_data, follow_redirects=False)
+    
+    fifty_pence_coin = Coin.get(Coin.coin_path == "fiftypence")
+    fifty_pence_duties = set([duty.duty_number for duty in fifty_pence_coin.duties])
+    assert set(fifty_pence_duties) == set([12])
+    assert fifty_pence_coin.is_complete == False
+    
+    assert response.status_code == 303
+    assert response.headers["location"] == "/coins"
+    
