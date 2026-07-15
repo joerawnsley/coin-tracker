@@ -234,7 +234,7 @@ def edit_coin_submit(
         )
     
 @app.get("/create-coin", response_class=HTMLResponse)
-def edit_coin_page(request: Request):
+def create_coin_page(request: Request):
     all_duties = list_duties()
     return templates.TemplateResponse(
         request=request,
