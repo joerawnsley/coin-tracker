@@ -47,7 +47,7 @@ def delete_coin(coin_path):
 
 # for adding and removing duties from coins
 @app.put("/api/coins/{coin_path}/add-duties", response_class=JSONResponse)
-def add_duty_to_coin(coin_path, duties: list[int]):
+def add_duties_to_coin(coin_path, duties: list[int]):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
         selected_coin.duties.add(Duty.get(Duty.duty_number == number))
@@ -55,7 +55,7 @@ def add_duty_to_coin(coin_path, duties: list[int]):
 
 
 @app.put("/api/coins/{coin_path}/remove-duties", response_class=JSONResponse)
-def remove_duty_from_coin(coin_path, duties: list[int]):
+def remove_duties_from_coin(coin_path, duties: list[int]):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
         selected_coin.duties.remove(Duty.get(Duty.duty_number == number))
