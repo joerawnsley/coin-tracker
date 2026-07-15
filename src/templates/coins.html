@@ -15,7 +15,12 @@
     {% for coin in coins %}
         <tr>
             <td><a href="/edit-coin/{{coin.coinPath}}">{{ coin.coinName }}</a></td>
-            <td>{{ coin.duties|join(', ') }}</td>
+            <!-- <td>{{ coin.duties|join(', ') }}</td> -->
+            <td>
+                {% for duty in coin.duties %}
+                    <a href="{{ url_for('duties_list_page') }}">Duty {{ duty }}</a>{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </td>
             {% if coin.isComplete %}
                 <td style="color: green"; ><b>Yes</b></td>
             {% else %}
