@@ -1,6 +1,6 @@
 import json, os
 from src.database import db
-from src.models import Coin, Duty
+from src.database_models import Coin, Duty
 
 db_environment = os.getenv('DB_ENVIRONMENT')
 

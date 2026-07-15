@@ -1,6 +1,6 @@
 import pytest, json, os, dotenv
 from src.database import db
-from src.models import Coin, Duty
+from src.database_models import Coin, Duty
 
 dotenv.load_dotenv()
     

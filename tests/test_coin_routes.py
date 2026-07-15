@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from src.database import db
 from src.utils import is_valid_uuid, coin_to_dict
 import pytest, json, peewee
-from src.models import Coin, Duty
+from src.database_models import Coin, Duty
 import os, logging
 
 if os.getenv('DB_LOGGING') == 'on':

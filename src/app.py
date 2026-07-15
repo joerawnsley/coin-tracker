@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Request, Form, status
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
-from src.models import Coin, Duty
+from src.database_models import Coin, Duty
+from src.input_models import NewCoin, NewDuty, DutyUpdate
 from src.database import db
 from src.utils import coin_to_dict, duty_to_dict
-from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 
@@ -14,22 +14,6 @@ templates = Jinja2Templates(directory="src/templates")
 @app.get("/api", response_class=JSONResponse)
 def root():
     return {"message": "Welcome to the Coins API"}
-
-# ---- input models ---
-
-class NewCoin(BaseModel):
-    coin_name: str
-    coin_path: str
-    duties: list[int] | None = None
-    is_complete: bool | None = None
-
-class NewDuty(BaseModel):
-    duty_number: int
-    description: str
-
-class DutyUpdate(BaseModel):
-    duty_number: int | None = None
-    description: str
 
 # -----coin routes-----
 

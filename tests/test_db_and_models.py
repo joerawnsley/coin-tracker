@@ -1,5 +1,5 @@
 from src.database import db
-from src.models import Coin, Duty
+from src.database_models import Coin, Duty
 from src.utils import is_valid_uuid
 import pytest, json, peewee, os
 import logging

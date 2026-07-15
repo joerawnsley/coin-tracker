@@ -1,5 +1,5 @@
 from src.app import app
-from src.models import Coin, Duty
+from src.database_models import Coin, Duty
 from fastapi.testclient import TestClient
 import os, logging
 
