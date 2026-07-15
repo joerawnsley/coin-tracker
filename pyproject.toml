@@ -1,6 +1,6 @@
 # set app entrypoint
 [tool.fastapi]
-entrypoint = "src.app:app"
+entrypoint = "src.coins_ui:app"
 
 # declare root directory for tests
 [tool.pytest.ini_options]
