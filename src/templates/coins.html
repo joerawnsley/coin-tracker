@@ -18,7 +18,7 @@
             <!-- <td>{{ coin.duties|join(', ') }}</td> -->
             <td>
                 {% for duty in coin.duties %}
-                    <a href="{{ url_for('duties_list_page') }}">Duty {{ duty }}</a>{% if not loop.last %}, {% endif %}
+                    <a href="{{ url_for('single_duty_page', duty_number=duty) }}">Duty {{ duty }}</a>{% if not loop.last %}, {% endif %}
                 {% endfor %}
             </td>
             {% if coin.isComplete %}
