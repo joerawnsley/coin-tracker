@@ -127,3 +127,15 @@ def test_post_create_coin_and_redirect(full_database):
     assert response.status_code == 303
     assert response.headers["location"] == "/coins"
     
+def test_post_delete_coin_and_redirect(full_database):
+    response = client.post("/delete-coin/deeper", follow_redirects=False)
+
+    assemble = Coin.select().where(Coin.coin_path == 'assemble')
+    assert assemble.exists()
+    deeper = Coin.select().where(Coin.coin_path == 'deeper')
+    assert not deeper.exists()
+    
+    assert response.status_code == 303
+    assert response.headers["location"] == "/coins"
+    
+    
