@@ -100,3 +100,13 @@ def test_create_coin_page_contains_form(full_database):
     assert "name" in response.text
     assert "path" in response.text
     assert "submit" in response.text
+
+def test_single_duty_page_dispalys_specified_duty(full_database):
+    response = client.get("/duties/6")
+    assert "<table" in response.text
+    assert "Duty 6" in response.text
+    assert "automation & orchestration" in response.text
+    assert "Duty 1" not in response.text
+    assert "Script and code" not in response.text
+    assert "<th>Description</th>" in response.text
+    assert "Coins" in response.text
