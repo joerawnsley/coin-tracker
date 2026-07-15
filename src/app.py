@@ -179,7 +179,8 @@ def duties_list_page(request: Request):
         request=request,
         name="duties.html",
         context={
-            "duties": duties
+            "duties": duties,
+            "page_mode": "all"
         }
     )
 
@@ -190,7 +191,8 @@ def single_duty_page(duty_number: int, request: Request):
         request=request,
         name="duties.html",
         context={
-            "duties": duties
+            "duties": duties,
+            "page_mode": "single"
         }
     )
 

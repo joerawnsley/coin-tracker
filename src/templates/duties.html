@@ -4,7 +4,9 @@
 
 {% block content %}
 
+{% if page_mode == "all" %}
 <p>Below is a list of all duties available to add to coins:</p>
+{% endif%}
 
 <table>
     <tr>
@@ -20,6 +22,10 @@
         </tr>
     {% endfor %}   
 </table>
+
+{% if page_mode == "single" %}
+<a href="{{ url_for('coins_list_page') }}">back</a>
+{% endif%}
 
 {% endblock %}
 
