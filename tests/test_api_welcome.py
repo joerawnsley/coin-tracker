@@ -1,4 +1,4 @@
-from src.app import app
+from src.coins_ui import app
 from fastapi.testclient import TestClient
 import os, logging
 
