@@ -1,4 +1,4 @@
-from src.coins_ui import app
+from src.app import app
 from src.database_models import Coin, Duty
 from fastapi.testclient import TestClient
 import os, logging
