@@ -1,18 +1,19 @@
+from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from src.database_models import Coin, Duty
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from src.utils import coin_to_dict, duty_to_dict
-from src.app import app
 
+router = APIRouter()
 
 # -----welcome endpoint-----
-@app.get("/api", response_class=JSONResponse)
+@router.get("/api", response_class=JSONResponse)
 def root():
     return {"message": "Welcome to the Coins API"}
 
 # -----coin routes-----
 
-@app.get("/api/coins", response_class=JSONResponse)
+@router.get("/api/coins", response_class=JSONResponse)
 def list_coins():
     query = Coin.select()
     coin_list = []
@@ -20,7 +21,7 @@ def list_coins():
         coin_list.append(coin_to_dict(coin))
     return coin_list
 
-@app.post("/api/coins", status_code=201, response_class=JSONResponse)
+@router.post("/api/coins", status_code=201, response_class=JSONResponse)
 def add_coin(coin: NewCoin):
     Coin.create(
         coin_name=coin.coin_name,
@@ -35,18 +36,18 @@ def add_coin(coin: NewCoin):
     return coin_to_dict(created_coin)
     
 
-@app.get("/api/coins/{coin_path}", response_class=JSONResponse)
+@router.get("/api/coins/{coin_path}", response_class=JSONResponse)
 def single_coin(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(selected_coin)
 
-@app.delete("/api/coins/{coin_path}")
+@router.delete("/api/coins/{coin_path}")
 def delete_coin(coin_path):
     Coin.delete().where(Coin.coin_path == coin_path).execute()
     return "Coin deleted"
 
 # for adding and removing duties from coins
-@app.put("/api/coins/{coin_path}/add-duties", response_class=JSONResponse)
+@router.put("/api/coins/{coin_path}/add-duties", response_class=JSONResponse)
 def add_duties_to_coin(coin_path, duties: list[int]):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
@@ -54,26 +55,26 @@ def add_duties_to_coin(coin_path, duties: list[int]):
     return coin_to_dict(selected_coin)
 
 
-@app.put("/api/coins/{coin_path}/remove-duties", response_class=JSONResponse)
+@router.put("/api/coins/{coin_path}/remove-duties", response_class=JSONResponse)
 def remove_duties_from_coin(coin_path, duties: list[int]):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
         selected_coin.duties.remove(Duty.get(Duty.duty_number == number))
     return coin_to_dict(selected_coin)
 
-@app.put("/api/coins/{coin_path}/mark-complete", response_class=JSONResponse)
+@router.put("/api/coins/{coin_path}/mark-complete", response_class=JSONResponse)
 def mark_coin_complete(coin_path):
     Coin.update({Coin.is_complete: True}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
-@app.put("/api/coins/{coin_path}/mark-incomplete", response_class=JSONResponse)
+@router.put("/api/coins/{coin_path}/mark-incomplete", response_class=JSONResponse)
 def mark_coin_incomplete(coin_path):
     Coin.update({Coin.is_complete: False}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
-@app.get("/api/coins/{coin_path}/list-duties", response_class=JSONResponse)
+@router.get("/api/coins/{coin_path}/list-duties", response_class=JSONResponse)
 def list_coin_duties(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     duties_list = []
@@ -83,7 +84,7 @@ def list_coin_duties(coin_path):
 
 # -----duties routes-----
 
-@app.get("/api/duties", response_class=JSONResponse)
+@router.get("/api/duties", response_class=JSONResponse)
 def list_duties():
     query = Duty.select()
     duty_list = []
@@ -91,12 +92,12 @@ def list_duties():
         duty_list.append(duty_to_dict(duty))
     return duty_list
 
-@app.get("/api/duties/{duty_number}", response_class=JSONResponse)
+@router.get("/api/duties/{duty_number}", response_class=JSONResponse)
 def single_duty(duty_number):
     selected_duty = Duty.get(Duty.duty_number == duty_number)
     return duty_to_dict(selected_duty)
 
-@app.post("/api/duties", status_code=201, response_class=JSONResponse)
+@router.post("/api/duties", status_code=201, response_class=JSONResponse)
 def add_duty(duty: NewDuty):
     Duty.create(
         duty_number = duty.duty_number,
@@ -105,7 +106,7 @@ def add_duty(duty: NewDuty):
     created_duty = Duty.get(Duty.duty_number == duty.duty_number)
     return duty_to_dict(created_duty)
 
-@app.put("/api/duties/{duty_number}/update", response_class=JSONResponse)
+@router.put("/api/duties/{duty_number}/update", response_class=JSONResponse)
 def update_duty_description(duty_number, update: DutyUpdate):
     selected_duty = Duty.get(Duty.duty_number == duty_number)
     if update.duty_number != selected_duty.duty_number and update.duty_number is not None:
@@ -115,6 +116,6 @@ def update_duty_description(duty_number, update: DutyUpdate):
     selected_duty.save(only=[Duty.description])
     return selected_duty
 
-@app.delete("/api/duties/{duty_number}", response_class=PlainTextResponse)
+@router.delete("/api/duties/{duty_number}", response_class=PlainTextResponse)
 def delete_duty():
     return "Error: Duties are forever. They cannot be deleted."

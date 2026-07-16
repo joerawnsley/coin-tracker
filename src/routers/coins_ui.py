@@ -1,15 +1,14 @@
-from fastapi import Request, Form, status
+from fastapi import APIRouter, Request, Form, status
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
-from src.app import app
-import src.coins_api as coins_api
+import src.routers.coins_api as coins_api
 
-
+router = APIRouter()
 templates = Jinja2Templates(directory="src/templates")
 
-@app.get("/", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 def welcome_page(request: Request):
     subpages = [
         {"title": "All Coins",
@@ -27,7 +26,7 @@ def welcome_page(request: Request):
         }
     )
 
-@app.get("/coins", response_class=HTMLResponse)
+@router.get("/coins", response_class=HTMLResponse)
 def coins_list_page(request: Request):
     coins = coins_api.list_coins()
     return templates.TemplateResponse(
@@ -38,7 +37,7 @@ def coins_list_page(request: Request):
         }
     )
 
-@app.get("/duties", response_class=HTMLResponse)
+@router.get("/duties", response_class=HTMLResponse)
 def duties_list_page(request: Request):
     duties = coins_api.list_duties()
     return templates.TemplateResponse(
@@ -50,7 +49,7 @@ def duties_list_page(request: Request):
         }
     )
 
-@app.get("/duties/{duty_number}", response_class=HTMLResponse)
+@router.get("/duties/{duty_number}", response_class=HTMLResponse)
 def single_duty_page(duty_number: int, request: Request):
     duties = [coins_api.single_duty(duty_number)]
     return templates.TemplateResponse(
@@ -62,7 +61,7 @@ def single_duty_page(duty_number: int, request: Request):
         }
     )
 
-@app.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
+@router.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
 def edit_coin_page(request: Request, coin_path: str):
     selected_coin = coins_api.single_coin(coin_path)
     all_duties = coins_api.list_duties()
@@ -75,7 +74,7 @@ def edit_coin_page(request: Request, coin_path: str):
         }
     )
 
-@app.post("/edit-coin/{coin_path}")
+@router.post("/edit-coin/{coin_path}")
 def edit_coin_submit(
         request: Request, 
         coin_path: str,
@@ -99,7 +98,7 @@ def edit_coin_submit(
             status_code=status.HTTP_303_SEE_OTHER
         )
     
-@app.get("/create-coin", response_class=HTMLResponse)
+@router.get("/create-coin", response_class=HTMLResponse)
 def create_coin_page(request: Request):
     all_duties = coins_api.list_duties()
     return templates.TemplateResponse(
@@ -110,7 +109,7 @@ def create_coin_page(request: Request):
         }
     )
 
-@app.post("/create-coin")
+@router.post("/create-coin")
 def create_coin_submit(
         coin_path: str = Form(),
         coin_name: str = Form(),
@@ -127,7 +126,7 @@ def create_coin_submit(
             status_code=status.HTTP_303_SEE_OTHER
         )
 
-@app.post("/delete-coin/{coin_path}")
+@router.post("/delete-coin/{coin_path}")
 def delete_coin_submit(coin_path: str):
     coin_to_delete = coins_api.single_coin(coin_path)
     existing_duties = coin_to_delete["duties"]
