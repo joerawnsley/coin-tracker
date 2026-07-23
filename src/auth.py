@@ -33,15 +33,17 @@ def get_user(db, username: str):
         return UserInDB(**user_dict)
     
     
-def fake_hash_password(password: str):
+def hash_password(password: str):
+    # not yet secure
     return "fakehashed" + password
 
-def fake_decode_token(token):
-    user = get_user(fake_users_db, token)
+def decode_token(token):
+    # not yet secure
+    user = get_user(db, token)
     return user
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
-    # user = fake_decode_token(token)
+    # user = decode_token(token)
     # if not user:
     #     raise HTTPException(
     #         status_code=status.HTTP_401_UNAUTHORIZED,
