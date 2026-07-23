@@ -1,6 +1,7 @@
 from src.auth import UserInDB, get_user, get_current_user
 from src.routers.login import login
 from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 import pytest
 
 fake_users_db = {
@@ -38,5 +39,6 @@ def test_get_current_user_not_exists(mocker):
         get_current_user("alice")
 
 def test_login_converts_form_submission_to_token():
-    token = login({"username": "joe", "password": "secret"})
-    assert token == "joe"
+    token = login(OAuth2PasswordRequestForm(username="joe", password='secret'))
+    assert token['access_token'] == "joe"
+    assert token['token_type'] == 'bearer'
