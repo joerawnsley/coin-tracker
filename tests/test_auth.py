@@ -1,4 +1,5 @@
 from src.auth import UserInDB, get_user, get_current_user
+from src.routers.login import login
 from fastapi import HTTPException
 import pytest
 
@@ -35,4 +36,7 @@ def test_get_current_user_not_exists(mocker):
     
     with pytest.raises(HTTPException):
         get_current_user("alice")
-        
+
+def test_login_converts_form_submission_to_token():
+    token = login({"username": "joe", "password": "secret"})
+    assert token == "joe"
