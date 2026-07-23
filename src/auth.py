@@ -39,7 +39,7 @@ def decode_token(token: str):
     return user
 
 
-async def get_current_user(access_token: str | None = Cookie(default=None)):
+def get_current_user(access_token: str | None = Cookie(default=None)):
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
