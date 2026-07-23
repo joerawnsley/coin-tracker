@@ -31,10 +31,8 @@ def test_get_current_user(mocker):
     assert user.username == "joe"
 
 def test_get_current_user_not_exists(mocker):
-    mocker.patch("src.auth.decode_token", return_value=UserInDB(
-            username="joe",
-            hashed_password="fakehashedsecret"
-        ))
+    mocker.patch("src.auth.decode_token", return_value=None)
+    
     with pytest.raises(HTTPException):
-        user = get_current_user("alice")
+        get_current_user("alice")
         
