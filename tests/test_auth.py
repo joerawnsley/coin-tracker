@@ -1,5 +1,5 @@
 from src.auth import UserInDB, get_user, get_current_user
-from src.routers.login import login
+from src.routers.auth_api import login
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 import pytest
