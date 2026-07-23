@@ -1,9 +1,5 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Cookie, HTTPException, status
 from pydantic import BaseModel
-from typing import Annotated
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 fake_users_db = {
     "joe": {
@@ -11,8 +7,8 @@ fake_users_db = {
         "hashed_password": "fakehashedsecret"
     },
     "admin": {
-            "username": "admin",
-            "hashed_password": "fakehashedadmin"
+        "username": "admin",
+        "hashed_password": "fakehashedadmin"
     }
 }
 
@@ -37,17 +33,25 @@ def hash_password(password: str):
     # not yet secure
     return "fakehashed" + password
 
-def decode_token(token):
+def decode_token(token: str):
     # not yet secure
     user = get_user(user_db, token)
     return user
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+
+async def get_current_user(access_token: str | None = Cookie(default=None)):
+    if not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
+    token = access_token.replace("Bearer ", "") if access_token.startswith("Bearer ") else access_token
+
     user = decode_token(token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
+            detail="Invalid authentication credentials",
         )
     return user
