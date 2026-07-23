@@ -14,3 +14,7 @@ fake_users_db = {
 def test_get_user_returns_correct_type():
     user_in_db = get_user(fake_users_db, "joe")
     assert isinstance(user_in_db, UserInDB)
+    
+def test_get_user_returns_correct_data():
+    user_in_db = get_user(fake_users_db, "joe")
+    assert user_in_db.hashed_password == "fakehashedsecret"
