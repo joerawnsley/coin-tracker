@@ -39,6 +39,9 @@ def test_get_current_user_not_exists(mocker):
         get_current_user("alice")
 
 def test_login_converts_form_submission_to_token():
-    token = login(OAuth2PasswordRequestForm(username="joe", password='secret'))
-    assert token['access_token'] == "joe"
-    assert token['token_type'] == 'bearer'
+    response = login(username="joe", password='secret')
+    set_cookie_header = response.headers.get("set-cookie")
+    assert response.status_code == 303
+    assert "access_token=" in set_cookie_header
+    assert "Bearer joe" in set_cookie_header
+    
