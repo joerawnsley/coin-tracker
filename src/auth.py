@@ -16,7 +16,7 @@ fake_users_db = {
     }
 }
 
-db = fake_users_db
+user_db = fake_users_db
 
 
 class User(BaseModel):
@@ -39,7 +39,7 @@ def hash_password(password: str):
 
 def decode_token(token):
     # not yet secure
-    user = get_user(db, token)
+    user = get_user(user_db, token)
     return user
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -51,4 +51,3 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
-    pass
