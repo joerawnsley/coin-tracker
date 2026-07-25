@@ -16,6 +16,9 @@ def welcome_page(request: Request):
         },
         {"title": "All Duties",
          "endpoint": "duties_list_page"
+        },
+        {"title": "login",
+         "endpoint": "login_page"
         }
     ]
     return templates.TemplateResponse(
