@@ -26,6 +26,13 @@ def welcome_page(request: Request):
         }
     )
 
+@router.get("/login", response_class=HTMLResponse)
+def login_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html"
+    )
+
 @router.get("/coins", response_class=HTMLResponse)
 def coins_list_page(request: Request):
     coins = coins_api.list_coins()
