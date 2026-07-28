@@ -31,6 +31,7 @@ def login(username: str = Form(...), password: str = Form(...)):
         key="access_token",
         value=f"Bearer {user_data.username}",
         httponly=True,
+        max_age=1800
     )
 
     return response
