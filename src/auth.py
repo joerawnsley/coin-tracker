@@ -40,6 +40,7 @@ def decode_token(token: str):
 
 
 def get_current_user(access_token: str | None = Cookie(default=None)):
+    # note: this will work well for authenticating API calls, but prevents pages from loading if not logged in
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
