@@ -27,6 +27,11 @@
         required
         >
   </div>
+  <div class="error-message">
+    {% if error %}
+        <p>Incorrect username or password</p>
+    {% endif %}
+  </div>
 
   <div class="form-actions">
     <button type="submit">Submit</button>
