@@ -39,7 +39,7 @@ def decode_token(token: str):
     return user
 
 
-def get_current_user(access_token: str | None = Cookie(default=None)):
+def get_current_user_api(access_token: str | None = Cookie(default=None)):
     # note: this will work well for authenticating API calls, but prevents pages from loading if not logged in
     if not access_token:
         raise HTTPException(
@@ -56,3 +56,14 @@ def get_current_user(access_token: str | None = Cookie(default=None)):
             detail="Invalid authentication credentials",
         )
     return user
+
+def get_current_username(access_token: str | None = Cookie(default=None)):
+    if not access_token:
+        return None
+    
+    token = access_token.replace("Bearer ", "") if access_token.startswith("Bearer ") else access_token
+
+    user = decode_token(token)
+    if not user:
+        return None
+    return user.username
