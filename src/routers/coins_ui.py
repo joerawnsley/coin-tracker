@@ -4,6 +4,8 @@ from src.input_models import NewCoin, NewDuty, DutyUpdate
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 import src.routers.coins_api as coins_api
+from src.auth import get_user, hash_password, user_db, get_current_username
+
 
 router = APIRouter()
 templates = Jinja2Templates(directory="src/templates")
@@ -23,17 +25,18 @@ def welcome_page(request: Request, access_token: Annotated[str | None, Cookie()]
         name="welcome.html",
         context={
             "subpages": subpages,
-            "access_token": access_token
+            "username": get_current_username(access_token)
         }
     )
 
 @router.get("/login", response_class=HTMLResponse)
-def login_page(request: Request, access_token: Annotated[str | None, Cookie()] = None):
+def login_page(request: Request, access_token: Annotated[str | None, Cookie()] = None, error: str | None = None):
     return templates.TemplateResponse(
         request=request,
         name="login.html",
         context={
-            "access_token": access_token
+            "username": get_current_username(access_token),
+            "error": error
         }
     )
 
@@ -45,7 +48,7 @@ def coins_list_page(request: Request, access_token: Annotated[str | None, Cookie
         name="coins.html",
         context={
             "coins": coins,
-            "access_token": access_token
+            "username": get_current_username(access_token)
         }
     )
 
@@ -58,7 +61,7 @@ def duties_list_page(request: Request, access_token: Annotated[str | None, Cooki
         context={
             "duties": duties,
             "page_mode": "all",
-            "access_token": access_token
+            "username": get_current_username(access_token)
         }
     )
 
@@ -71,7 +74,7 @@ def single_duty_page(duty_number: int, request: Request, access_token: Annotated
         context={
             "duties": duties,
             "page_mode": "single",
-            "access_token": access_token
+            "username": get_current_username(access_token)
         }
     )
 
@@ -85,7 +88,7 @@ def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str
         context={
             "coin": selected_coin,
             "duties": all_duties,
-            "access_token": access_token
+            "username": get_current_username(access_token)
         }
     )
 
@@ -112,9 +115,6 @@ def edit_coin_submit(
     return RedirectResponse(
             url="/coins",
             status_code=status.HTTP_303_SEE_OTHER,
-            context={
-                "access_token": access_token
-            }
         )
     
 @router.get("/create-coin", response_class=HTMLResponse)
@@ -125,7 +125,7 @@ def create_coin_page(request: Request, access_token: Annotated[str | None, Cooki
         name="create-coin.html",
         context={
             "duties": all_duties,
-            "access_token": access_token
+            "username": get_current_username(access_token)
         }
     )
 
@@ -145,9 +145,6 @@ def create_coin_submit(
     return RedirectResponse(
             url="/coins",
             status_code=status.HTTP_303_SEE_OTHER,
-            context={
-                "access_token": access_token
-            }
         )
 
 @router.post("/delete-coin/{coin_path}")
@@ -161,7 +158,41 @@ def delete_coin_submit(coin_path: str, access_token: Annotated[str | None, Cooki
     return RedirectResponse(
             url="/coins",
             status_code=status.HTTP_303_SEE_OTHER,
-            context={
-                "access_token": access_token
-            }
         )
+
+@router.post("/login")
+def login(username: str = Form(...), password: str = Form(...)):
+    user_data = get_user(user_db, username)
+    if not user_data:
+        return RedirectResponse(
+            url="/login?error=Invalid credentials", 
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    hashed_password = hash_password(password)
+    if hashed_password != user_data.hashed_password:
+        return RedirectResponse(
+            url="/login?error=Invalid credentials", 
+            status_code=status.HTTP_303_SEE_OTHER
+        )
+
+    response = RedirectResponse(
+        url="/coins", 
+        status_code=status.HTTP_303_SEE_OTHER
+    )
+
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {user_data.username}",
+        httponly=True,
+        max_age=1800
+    )
+
+    return response
+
+
+@router.get("/logout")
+def logout():
+    response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    response.delete_cookie("access_token")
+    return response
