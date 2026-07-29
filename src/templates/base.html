@@ -22,16 +22,19 @@
         tr:nth-child(even) {
             background-color: #dddddd;
         }
+
+        .error-message {
+            color: red
+        }
     </style>
 </head>
 <body>
     <a href="/"><h2>Joe's Coins</h2></a>
-    {% if access_token %}
-        <p>access token present:</p>
-        <p>{{access_token}}</p>
+    {% if username %}
+        <p>logged in as {{username}}</p>
         <a href="/logout">Log out</a>
+
     {% else %}
-        <p>no access token</p>
         <a href="/login">Log in</a>
     {% endif %}
     {% block content %}
