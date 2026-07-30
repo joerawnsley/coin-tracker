@@ -1,10 +1,31 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Cookie, Header, HTTPException, status, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from src.database_models import Coin, Duty
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from src.utils import coin_to_dict, duty_to_dict
+from src.auth import User, get_current_user
+from typing import Annotated
 
 router = APIRouter()
+
+SessionCookie = Annotated[str | None, Cookie()]
+AuthHeader = Annotated[str | None, Header()]
+
+def get_token(
+    access_token: SessionCookie = None,
+    authorization: AuthHeader = None,
+):
+    if access_token:
+        return access_token
+    
+    if authorization:
+        return authorization
+
+    else:
+        raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Missing authentication credentials"
+    )
 
 # -----welcome endpoint-----
 @router.get("/api", response_class=JSONResponse)
@@ -63,7 +84,8 @@ def remove_duties_from_coin(coin_path, duties: list[int]):
     return coin_to_dict(selected_coin)
 
 @router.put("/api/coins/{coin_path}/mark-complete", response_class=JSONResponse)
-def mark_coin_complete(coin_path):
+def mark_coin_complete(coin_path: str, token: Annotated[str | None, Depends(get_token)] = None):
+    get_current_user(token)
     Coin.update({Coin.is_complete: True}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
