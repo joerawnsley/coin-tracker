@@ -4,7 +4,7 @@ from src.input_models import NewCoin, NewDuty, DutyUpdate
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 import src.routers.coins_api as coins_api
-from src.auth import get_user, hash_password, user_db, get_current_username
+from src.auth import get_user, hash_password, user_db, get_current_user, get_current_username
 
 
 router = APIRouter()
@@ -80,6 +80,7 @@ def single_duty_page(duty_number: int, request: Request, access_token: Annotated
 
 @router.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
 def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str | None, Cookie()] = None):
+    user = get_current_user(access_token)
     selected_coin = coins_api.single_coin(coin_path)
     all_duties = coins_api.list_duties()
     return templates.TemplateResponse(
@@ -88,7 +89,7 @@ def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str
         context={
             "coin": selected_coin,
             "duties": all_duties,
-            "username": get_current_username(access_token)
+            "username": user.username
         }
     )
 
