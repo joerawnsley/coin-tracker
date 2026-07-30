@@ -29,6 +29,11 @@
         </tr>
     {% endfor %}   
 </table>
+<div class="error-message">
+{% if error %}
+    <p>Please log in to edit coins</p>
+{% endif %}
+</div>
 <br>
 <a href="/create-coin" style="color: black">Create New Coin</a>
 

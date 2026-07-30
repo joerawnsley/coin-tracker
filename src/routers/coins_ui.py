@@ -41,14 +41,15 @@ def login_page(request: Request, access_token: Annotated[str | None, Cookie()] =
     )
 
 @router.get("/coins", response_class=HTMLResponse)
-def coins_list_page(request: Request, access_token: Annotated[str | None, Cookie()] = None):
+def coins_list_page(request: Request, access_token: Annotated[str | None, Cookie()] = None, error: str | None = None):
     coins = coins_api.list_coins()
     return templates.TemplateResponse(
         request=request,
         name="coins.html",
         context={
             "coins": coins,
-            "username": get_current_username(access_token)
+            "username": get_current_username(access_token),
+            "error": error
         }
     )
 
@@ -96,7 +97,7 @@ def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str
         )
     except:
         return RedirectResponse(
-                    url="/coins?error=Please log in to edit coin", 
+                    url="/coins?error=unauthorised", 
                     status_code=status.HTTP_303_SEE_OTHER
                 )
 
