@@ -193,6 +193,6 @@ def login(username: str = Form(...), password: str = Form(...)):
 
 @router.get("/logout")
 def logout():
-    response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("access_token")
     return response
