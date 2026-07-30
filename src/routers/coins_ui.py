@@ -117,7 +117,7 @@ def edit_coin_submit(
     coins_api.add_duties_to_coin(coin_path, duties)
     
     if completed and not original_status:
-        coins_api.mark_coin_complete(coin_path)
+        coins_api.mark_coin_complete(coin_path, access_token)
     if original_status and not completed:
         coins_api.mark_coin_incomplete(coin_path)
     
