@@ -1,4 +1,4 @@
-from src.auth import UserInDB, get_user, get_current_user_api
+from src.auth import UserInDB, get_user, get_current_user
 from src.routers.coins_ui import login
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -24,19 +24,19 @@ def test_get_user_returns_correct_data():
     assert user_in_db.hashed_password == "fakehashedsecret"
     assert user_in_db.username == "joe"
     
-def test_get_current_user_api(mocker):
+def test_get_current_user(mocker):
     mocker.patch("src.auth.decode_token", return_value=UserInDB(
         username="joe",
         hashed_password="fakehashedsecret"
     ))
-    user = get_current_user_api("joe")
+    user = get_current_user("joe")
     assert user.username == "joe"
 
 def test_get_current_user_not_exists(mocker):
     mocker.patch("src.auth.decode_token", return_value=None)
     
     with pytest.raises(HTTPException):
-        get_current_user_api("alice")
+        get_current_user("alice")
 
 def test_login_converts_form_submission_to_token():
     response = login(username="joe", password='secret')
