@@ -81,10 +81,10 @@ def test_edit_coin_page_contains_form(full_database):
     client.cookies.delete("access_token")
 
 def test_edit_coin_page_redirects_if_not_logged_in(full_database):
-    response = client.get("edit-coin/deeper")
+    response = client.get("edit-coin/deeper", follow_redirects=False)
     assert "<form" not in response.text
     assert response.status_code == 303
-    assert response.headers["location"] == "/coins"
+    assert "/coins" in response.headers["location"]
 
 def test_update_and_redirect_on_submit(full_database):
     updates = {

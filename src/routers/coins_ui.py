@@ -80,18 +80,25 @@ def single_duty_page(duty_number: int, request: Request, access_token: Annotated
 
 @router.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
 def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str | None, Cookie()] = None):
-    user = get_current_user(access_token)
-    selected_coin = coins_api.single_coin(coin_path)
-    all_duties = coins_api.list_duties()
-    return templates.TemplateResponse(
-        request=request,
-        name="edit-coin.html",
-        context={
-            "coin": selected_coin,
-            "duties": all_duties,
-            "username": user.username
-        }
-    )
+    
+    try: 
+        user = get_current_user(access_token)
+        selected_coin = coins_api.single_coin(coin_path)
+        all_duties = coins_api.list_duties()
+        return templates.TemplateResponse(
+            request=request,
+            name="edit-coin.html",
+            context={
+                "coin": selected_coin,
+                "duties": all_duties,
+                "username": user.username
+            }
+        )
+    except:
+        return RedirectResponse(
+                    url="/coins?error=Please log in to edit coin", 
+                    status_code=status.HTTP_303_SEE_OTHER
+                )
 
 @router.post("/edit-coin/{coin_path}")
 def edit_coin_submit(
