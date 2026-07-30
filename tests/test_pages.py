@@ -91,6 +91,7 @@ def test_update_and_redirect_on_submit(full_database):
         "duties": [5, 7, 10],
         "completed": "true"
     }
+    client.post("/login", data={"username": "testuser", "password": "12345678"})
     response = client.post("/edit-coin/houston", data=updates, follow_redirects=False)
     
     houston_coin = Coin.get(Coin.coin_path == "houston")
@@ -100,6 +101,8 @@ def test_update_and_redirect_on_submit(full_database):
     
     assert response.status_code == 303
     assert response.headers["location"] == "/coins"
+    client.cookies.delete("access_token")
+
 
 
 def test_create_coin_page_contains_form(full_database):

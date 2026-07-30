@@ -150,6 +150,7 @@ def test_remove_duties_from_coin(full_database):
     assert houston_duties == set([10])
     
 def test_mark_coin_complete(full_database):
+    client.post("/login", data={"username": "testuser", "password": "12345678"})
     security_coin = Coin.get(Coin.coin_path == "security")
     assemble_coin = Coin.get(Coin.coin_path == "assemble")
     assert security_coin.is_complete == False
@@ -161,7 +162,9 @@ def test_mark_coin_complete(full_database):
     assemble_coin = Coin.get(Coin.coin_path == "assemble")
     assert security_coin.is_complete == True
     assert assemble_coin.is_complete == False
-    assert '"isComplete":true' in response.text    
+    assert '"isComplete":true' in response.text
+    client.cookies.delete("access_token")
+    
 
 def test_mark_coin_incomplete(full_database):
     security_coin = Coin.get(Coin.coin_path == "security")
