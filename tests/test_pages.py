@@ -72,11 +72,19 @@ def test_duty_list_shows_linked_coins(full_database):
     assert "Houston, Prepare to Launch" in response.text
     
 def test_edit_coin_page_contains_form(full_database):
+    client.post("/login", data={"username": "testuser", "password": "12345678"})
     response = client.get("edit-coin/deeper")
     assert "<form" in response.text
     assert "name" in response.text
     assert "path" in response.text
     assert "submit" in response.text
+    client.cookies.delete("access_token")
+
+def test_edit_coin_page_redirects_if_not_logged_in(full_database):
+    response = client.get("edit-coin/deeper")
+    assert "<form" not in response.text
+    assert response.status_code == 303
+    assert response.headers["location"] == "/coins"
 
 def test_update_and_redirect_on_submit(full_database):
     updates = {

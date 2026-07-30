@@ -9,7 +9,11 @@ fake_users_db = {
     "admin": {
         "username": "admin",
         "hashed_password": "fakehashedadmin"
-    }
+    },
+    "testuser": {
+            "username": "testuser",
+            "hashed_password": "fakehashed12345678"
+        }
 }
 
 user_db = fake_users_db
