@@ -4,15 +4,18 @@ from pydantic import BaseModel
 fake_users_db = {
     "joe": {
         "username": "joe",
-        "hashed_password": "fakehashedsecret"
+        "hashed_password": "fakehashedsecret",
+        "role": "user"
     },
     "admin": {
         "username": "admin",
-        "hashed_password": "fakehashedadmin"
+        "hashed_password": "fakehashedadmin",
+        "role": "admin"
     },
     "testuser": {
             "username": "testuser",
-            "hashed_password": "fakehashed12345678"
+            "hashed_password": "fakehashed12345678",
+            "role": "user"
         }
 }
 
@@ -73,6 +76,7 @@ def authenticate_api_call(username, password, db):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
+    # return user_data
 
 # is this used? delete if not
 def get_current_username(access_token: str | None = Cookie(default=None)):
