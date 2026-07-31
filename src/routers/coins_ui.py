@@ -4,7 +4,7 @@ from src.input_models import NewCoin, NewDuty, DutyUpdate
 from fastapi.templating import Jinja2Templates
 from typing import Annotated
 import src.routers.coins_api as coins_api
-from src.auth import get_user, hash_password, user_db, get_user_from_token, get_current_username
+from src.auth import get_user_from_username, hash_password, user_db, get_user_from_token, get_current_username
 
 
 router = APIRouter()
@@ -171,7 +171,7 @@ def delete_coin_submit(coin_path: str, access_token: Annotated[str | None, Cooki
 
 @router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
-    user_data = get_user(user_db, username)
+    user_data = get_user_from_username(user_db, username)
     if not user_data:
         return RedirectResponse(
             url="/login?error=Invalid credentials", 

@@ -27,7 +27,7 @@ class User(BaseModel):
 class UserInDB(User):
     hashed_password: str
     
-def get_user(db, username: str):
+def get_user_from_username(db, username: str):
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)
@@ -39,7 +39,7 @@ def hash_password(password: str):
 
 def decode_token(token: str):
     # not yet secure
-    user = get_user(user_db, token)
+    user = get_user_from_username(user_db, token)
     return user
 
 
@@ -61,7 +61,7 @@ def get_user_from_token(access_token):
     return user
 
 def authenticate_api_call(username, password, db):
-    user_data = get_user(db, username)
+    user_data = get_user_from_username(db, username)
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
