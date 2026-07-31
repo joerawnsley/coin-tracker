@@ -37,11 +37,16 @@ def add_coin(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-    # REQUIRE ADMIN
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+    
+    if user.role != "admin":
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
         
     Coin.create(
         coin_name=coin.coin_name,
