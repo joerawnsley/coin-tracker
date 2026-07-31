@@ -15,7 +15,8 @@ security = HTTPBasic()
 
 # ------------------------------------------------------------------------------------------ 
 # ------------------------------ welcome route -----------------------------------------------
-# ------------------------------------------------------------------------------------------ @router.get("/api", response_class=JSONResponse)
+# ------------------------------------------------------------------------------------------ 
+@router.get("/api", response_class=JSONResponse)
 def root():
     return {"message": "Welcome to the Coins API"}
 # ------------------------------------------------------------------------------------------ 
@@ -36,6 +37,7 @@ def add_coin(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+    # REQUIRE ADMIN
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -64,6 +66,8 @@ def delete_coin(coin_path,
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+        # REQUIRE ADMIN
+
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -82,6 +86,8 @@ def add_duties_to_coin(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+        # REQUIRE ADMIN
+
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -99,6 +105,8 @@ def remove_duties_from_coin(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+        # REQUIRE ADMIN
+
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -115,6 +123,8 @@ def mark_coin_complete(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
     ):
+        # require authenticated user
+
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -130,6 +140,8 @@ def mark_coin_incomplete(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+            # require authenticated user
+
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -170,6 +182,8 @@ def add_duty(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+            # REQUIRE ADMIN
+
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -189,6 +203,8 @@ def update_duty_description(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
+            # REQUIRE ADMIN
+
     if access_token:
         get_user_from_token(access_token)
     else:
