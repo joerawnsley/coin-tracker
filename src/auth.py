@@ -60,6 +60,20 @@ def get_current_user(access_token):
         )
     return user
 
+def authenticate_api_call(username, password, db):
+    user_data = get_user(db, username)
+    if not user_data:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+    hashed_password = hash_password(password)
+    if hashed_password != user_data.hashed_password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
 # is this used? delete if not
 def get_current_username(access_token: str | None = Cookie(default=None)):
     if not access_token:

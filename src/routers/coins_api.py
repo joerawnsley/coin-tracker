@@ -4,25 +4,13 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from src.database_models import Coin, Duty
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from src.utils import coin_to_dict, duty_to_dict
-from src.auth import User, get_user, get_current_user, hash_password, user_db
+from src.auth import user_db, get_current_user, authenticate_api_call
 from typing import Annotated
 
 router = APIRouter()
 security = HTTPBasic()
 
-def authenticate_api_call(username, password, db):
-    user_data = get_user(db, username)
-    if not user_data:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-        )
-    hashed_password = hash_password(password)
-    if hashed_password != user_data.hashed_password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-        )
+
 
 # -----welcome endpoint-----
 @router.get("/api", response_class=JSONResponse)
@@ -86,7 +74,6 @@ def mark_coin_complete(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
     ):
-    
     if access_token:
         get_current_user(access_token)
     else:
