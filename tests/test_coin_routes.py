@@ -4,7 +4,7 @@ from src.database import db
 from src.utils import is_valid_uuid, coin_to_dict
 import pytest, json, peewee
 from src.database_models import Coin, Duty
-import os, logging
+import os, logging, base64
 
 if os.getenv('DB_LOGGING') == 'on':
     logging.getLogger('peewee').addHandler(logging.StreamHandler())
@@ -150,13 +150,15 @@ def test_remove_duties_from_coin(full_database):
     assert houston_duties == set([10])
     
 def test_mark_coin_complete(full_database):
-    client.post("/login", data={"username": "testuser", "password": "12345678"})
     security_coin = Coin.get(Coin.coin_path == "security")
     assemble_coin = Coin.get(Coin.coin_path == "assemble")
     assert security_coin.is_complete == False
     assert assemble_coin.is_complete == False
     
-    response = client.put("/api/coins/security/mark-complete")
+    test_credentials = "testuser:12345678"
+    encoded_credentials = base64.b64encode(test_credentials.encode("utf-8")).decode("utf-8")
+    headers = {"Authorization": f"Basic {encoded_credentials}"}
+    response = client.put("/api/coins/security/mark-complete",headers=headers)
     
     security_coin = Coin.get(Coin.coin_path == "security")
     assemble_coin = Coin.get(Coin.coin_path == "assemble")
