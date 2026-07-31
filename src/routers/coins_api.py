@@ -1,31 +1,28 @@
 from fastapi import APIRouter, Cookie, Header, HTTPException, status, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from src.database_models import Coin, Duty
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from src.utils import coin_to_dict, duty_to_dict
-from src.auth import User, get_current_user
+from src.auth import User, get_user, get_current_user, hash_password, user_db
 from typing import Annotated
 
 router = APIRouter()
+security = HTTPBasic()
 
-SessionCookie = Annotated[str | None, Cookie()]
-AuthHeader = Annotated[str | None, Header()]
-
-def get_token(
-    access_token: SessionCookie = None,
-    authorization: AuthHeader = None,
-):
-    if access_token:
-        return access_token
-    
-    if authorization:
-        return authorization
-
-    else:
+def authenticate_api_call(username, password, db):
+    user_data = get_user(db, username)
+    if not user_data:
         raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Missing authentication credentials"
-    )
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+    hashed_password = hash_password(password)
+    if hashed_password != user_data.hashed_password:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
 
 # -----welcome endpoint-----
 @router.get("/api", response_class=JSONResponse)
@@ -84,8 +81,17 @@ def remove_duties_from_coin(coin_path, duties: list[int]):
     return coin_to_dict(selected_coin)
 
 @router.put("/api/coins/{coin_path}/mark-complete", response_class=JSONResponse)
-def mark_coin_complete(coin_path: str, token: Annotated[str | None, Depends(get_token)] = None):
-    get_current_user(token)
+def mark_coin_complete(
+        coin_path: str, 
+        access_token: str | None = None, 
+        credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
+    ):
+    
+    if access_token:
+        get_current_user(access_token)
+    else:
+        authenticate_api_call(credentials.username, credentials.password, user_db)
+        
     Coin.update({Coin.is_complete: True}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
