@@ -25,7 +25,7 @@ def root():
 
 @router.get("/api/coins", response_class=JSONResponse)
 def list_coins():
-    query = Coin.select()
+    query = Coin.select().order_by(Coin.coin_name)
     coin_list = []
     for coin in query:
         coin_list.append(coin_to_dict(coin))
@@ -155,8 +155,6 @@ def mark_coin_incomplete(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-            # require authenticated user
-
     if access_token:
         get_user_from_token(access_token)
     else:
