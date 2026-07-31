@@ -35,7 +35,7 @@
   </div>
 
   <!-- Duties (Selection) -->
-<div class="form-group">
+<div class="form-group" {% if role !="admin" %}hidden{% endif %}>
   <label>Duties for this coin:</label>
   
   <!-- Container with a max-height and overflow makes it a neat scrollable box -->
@@ -48,6 +48,7 @@
             name="duties" 
             value="{{ duty.dutyNumber }}"
             {% if duty.dutyNumber in coin.duties %}checked{% endif %}
+            {% if role !="admin" %}disabled{% endif %}
           >
           <span><b>Duty {{ duty.dutyNumber }}:</b> {{duty.description}}</span>
         </label>
@@ -79,6 +80,7 @@
       type="submit" 
       form="delete-coin-form" 
       class="btn-delete"
+      {% if role !="admin" %}hidden{% endif %}
     >
       Delete Coin
     </button>
