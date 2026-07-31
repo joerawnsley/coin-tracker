@@ -134,8 +134,8 @@ def edit_coin_submit(
     original_duties = original_coin["duties"]
     original_status = original_coin["isComplete"]
     
-    coins_api.remove_duties_from_coin(coin_path, original_duties)
-    coins_api.add_duties_to_coin(coin_path, duties)
+    coins_api.remove_duties_from_coin(coin_path, original_duties, access_token)
+    coins_api.add_duties_to_coin(coin_path, duties, access_token)
     
     if completed and not original_status:
         coins_api.mark_coin_complete(coin_path, access_token)
@@ -178,7 +178,7 @@ def create_coin_submit(
         coin_path=coin_path,
         duties=duties
     )
-    coins_api.add_coin(new_coin)
+    coins_api.add_coin(new_coin, access_token)
     return RedirectResponse(
             url="/coins",
             status_code=status.HTTP_303_SEE_OTHER,
@@ -188,9 +188,9 @@ def create_coin_submit(
 def delete_coin_submit(coin_path: str, access_token: Annotated[str | None, Cookie()] = None):
     coin_to_delete = coins_api.single_coin(coin_path)
     existing_duties = coin_to_delete["duties"]
-    coins_api.remove_duties_from_coin(coin_path, existing_duties)
+    coins_api.remove_duties_from_coin(coin_path, existing_duties, access_token)
     
-    coins_api.delete_coin(coin_path)
+    coins_api.delete_coin(coin_path, access_token)
     
     return RedirectResponse(
             url="/coins",
