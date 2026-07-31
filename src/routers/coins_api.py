@@ -71,12 +71,16 @@ def delete_coin(coin_path,
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-        # REQUIRE ADMIN
 
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)   
+        user = authenticate_api_call(credentials.username, credentials.password, user_db) 
+    if user.role != "admin":
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )  
     
     try:
         Coin.delete().where(Coin.coin_path == coin_path).execute()
@@ -91,12 +95,16 @@ def add_duties_to_coin(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-        # REQUIRE ADMIN
 
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+    if user.role != "admin":
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
         
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
@@ -110,12 +118,16 @@ def remove_duties_from_coin(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-        # REQUIRE ADMIN
 
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+    if user.role != "admin":
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )  
         
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
@@ -128,8 +140,6 @@ def mark_coin_complete(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
     ):
-        # require authenticated user
-
     if access_token:
         get_user_from_token(access_token)
     else:
@@ -187,12 +197,16 @@ def add_duty(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-            # REQUIRE ADMIN
 
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+    if user.role != "admin":
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )  
         
     Duty.create(
         duty_number = duty.duty_number,
@@ -208,12 +222,16 @@ def update_duty_description(
         access_token: str | None = None, 
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
-            # REQUIRE ADMIN
 
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+    if user.role != "admin":
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+            )
     
     selected_duty = Duty.get(Duty.duty_number == duty_number)
     if update.duty_number != selected_duty.duty_number and update.duty_number is not None:
