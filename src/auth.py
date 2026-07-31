@@ -26,6 +26,7 @@ class User(BaseModel):
     username: str
     email: str | None = None
     disabled: bool | None = None
+    role: str
 
 class UserInDB(User):
     hashed_password: str
@@ -52,9 +53,7 @@ def get_user_from_token(access_token):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
         )
-
     token = access_token.replace("Bearer ", "") if access_token.startswith("Bearer ") else access_token
-
     user = decode_token(token)
     if not user:
         raise HTTPException(
@@ -76,7 +75,7 @@ def authenticate_api_call(username, password, db):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
-    # return user_data
+    return user_data
 
 # is this used? delete if not
 def get_current_username(access_token: str | None = Cookie(default=None)):
