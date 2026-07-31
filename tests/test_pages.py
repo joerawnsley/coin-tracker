@@ -75,8 +75,8 @@ def test_edit_coin_page_contains_form(full_database):
     client.post("/login", data={"username": "testuser", "password": "12345678"})
     response = client.get("edit-coin/deeper")
     assert "<form" in response.text
-    assert "name" in response.text
-    assert "path" in response.text
+    assert "duties" in response.text
+    assert "checkbox" in response.text
     assert "submit" in response.text
     client.cookies.delete("access_token")
 
