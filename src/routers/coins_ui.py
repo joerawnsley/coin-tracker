@@ -10,6 +10,10 @@ from src.auth import get_user_from_username, hash_password, user_db, get_user_fr
 router = APIRouter()
 templates = Jinja2Templates(directory="src/templates")
 
+# =====================================================================================
+#               - - - - - - - - - - WELCOME ROUTE - - - - - - - - -
+# =====================================================================================
+
 @router.get("/", response_class=HTMLResponse)
 def welcome_page(request: Request, access_token: Annotated[str | None, Cookie()] = None):
     subpages = [
@@ -29,16 +33,9 @@ def welcome_page(request: Request, access_token: Annotated[str | None, Cookie()]
         }
     )
 
-@router.get("/login", response_class=HTMLResponse)
-def login_page(request: Request, access_token: Annotated[str | None, Cookie()] = None, error: str | None = None):
-    return templates.TemplateResponse(
-        request=request,
-        name="login.html",
-        context={
-            "username": get_current_username(access_token),
-            "error": error
-        }
-    )
+# =====================================================================================
+#               - - - - - - - - - - LIST/DETAIL ROUTES - - - - - - - - -
+# =====================================================================================
 
 @router.get("/coins", response_class=HTMLResponse)
 def coins_list_page(request: Request, access_token: Annotated[str | None, Cookie()] = None, error: str | None = None):
@@ -78,6 +75,10 @@ def single_duty_page(duty_number: int, request: Request, access_token: Annotated
             "username": get_current_username(access_token)
         }
     )
+
+# =====================================================================================
+#         - - - - - - - - - - CREATE/EDIT/DELETE ROUTES - - - - - - - - -
+# =====================================================================================
 
 @router.get("/edit-coin/{coin_path}", response_class=HTMLResponse)
 def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str | None, Cookie()] = None):
@@ -169,6 +170,21 @@ def delete_coin_submit(coin_path: str, access_token: Annotated[str | None, Cooki
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
+# =====================================================================================
+#                    - - - - - - - - - - LOGIN ROUTES - - - - - - - - -
+# =====================================================================================
+
+@router.get("/login", response_class=HTMLResponse)
+def login_page(request: Request, access_token: Annotated[str | None, Cookie()] = None, error: str | None = None):
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={
+            "username": get_current_username(access_token),
+            "error": error
+        }
+    )
+    
 @router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
     user_data = get_user_from_username(user_db, username)
