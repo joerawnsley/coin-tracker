@@ -91,7 +91,7 @@ def test_update_and_redirect_on_submit(full_database):
         "duties": [5, 7, 10],
         "completed": "true"
     }
-    client.post("/login", data={"username": "testuser", "password": "12345678"})
+    client.post("/login", data={"username": "admin", "password": "admin"})
     response = client.post("/edit-coin/houston", data=updates, follow_redirects=False)
     
     houston_coin = Coin.get(Coin.coin_path == "houston")
@@ -155,7 +155,7 @@ def test_post_create_coin_and_redirect_admin(full_database):
     client.cookies.delete("access_token")
     
 def test_post_delete_coin_and_redirect(full_database):
-    client.post("/login", data={"username": "testuser", "password": "12345678"})
+    client.post("/login", data={"username": "admin", "password": "admin"})
     response = client.post("/delete-coin/deeper", follow_redirects=False)
 
     assemble = Coin.select().where(Coin.coin_path == 'assemble')
