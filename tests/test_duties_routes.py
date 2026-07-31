@@ -1,3 +1,4 @@
+import base64
 from src.app import app
 from fastapi.testclient import TestClient
 from src.database import db
@@ -11,6 +12,10 @@ if os.getenv('DB_LOGGING') == 'on':
 
 # ------------ create test client ----------------
 client = TestClient(app)
+
+test_credentials = "testuser:12345678"
+encoded_credentials = base64.b64encode(test_credentials.encode("utf-8")).decode("utf-8")
+test_headers = {"Authorization": f"Basic {encoded_credentials}"}
 
 # duties routes
 
@@ -37,7 +42,7 @@ def test_get_single_duty(full_database):
     
 def test_add_new_duty(empty_database):
     assert Duty.select().count() == 0
-    client.post("/api/duties", json={"duty_number": 1, "description": "Script and code"})
+    client.post("/api/duties", json={"duty_number": 1, "description": "Script and code"}, headers=test_headers)
     assert Duty.select().count() == 1
     assert "Script and code" in Duty.get(Duty.duty_number == 1).description
     
@@ -45,7 +50,7 @@ def test_update_duty(full_database):
     duty_3 = Duty.get(Duty.duty_number == 3)
     assert "mob programming" in duty_3.description
     
-    response = client.put("/api/duties/3/update", json={"description": "Work as part of an agile team"})
+    response = client.put("/api/duties/3/update", json={"description": "Work as part of an agile team"}, headers=test_headers)
     
     duty_3 = Duty.get(Duty.duty_number == 3)
     assert "mob programming" not in duty_3.description
@@ -55,7 +60,7 @@ def test_update_duty(full_database):
 def test_duties_cannpt_be_deleted(full_database):
     duty_13 = Duty.get(Duty.duty_number == 13)
     assert "you build it, you run it" in duty_13.description
-    response = client.delete("/api/duties/13")
+    response = client.delete("/api/duties/13", headers=test_headers)
     duty_13 = Duty.get(Duty.duty_number == 13)
     assert "you build it, you run it" in duty_13.description
     assert "Error" in response.text
