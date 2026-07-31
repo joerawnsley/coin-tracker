@@ -34,7 +34,11 @@
     <p>Please log in to edit or create coins</p>
 {% endif %}
 </div>
+
 <br>
+
+{% if username == "admin" %}
 <a href="/create-coin" style="color: black">Create New Coin</a>
+{% endif %}
 
 {% endblock %}
