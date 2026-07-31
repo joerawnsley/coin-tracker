@@ -4,7 +4,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from src.database_models import Coin, Duty
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from src.utils import coin_to_dict, duty_to_dict
-from src.auth import user_db, get_current_user, authenticate_api_call
+from src.auth import user_db, get_user_from_token, authenticate_api_call
 from typing import Annotated
 
 router = APIRouter()
@@ -75,7 +75,7 @@ def mark_coin_complete(
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
     ):
     if access_token:
-        get_current_user(access_token)
+        get_user_from_token(access_token)
     else:
         authenticate_api_call(credentials.username, credentials.password, user_db)
         

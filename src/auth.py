@@ -43,7 +43,7 @@ def decode_token(token: str):
     return user
 
 
-def get_current_user(access_token):
+def get_user_from_token(access_token):
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
