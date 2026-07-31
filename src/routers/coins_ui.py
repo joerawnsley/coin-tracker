@@ -113,7 +113,8 @@ def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str
             context={
                 "coin": selected_coin,
                 "duties": all_duties,
-                "username": user.username
+                "username": user.username,
+                "role": user.role
             }
         )
     except HTTPException:
@@ -134,13 +135,15 @@ def edit_coin_submit(
     original_duties = original_coin["duties"]
     original_status = original_coin["isComplete"]
     
-    coins_api.remove_duties_from_coin(coin_path, original_duties, access_token)
-    coins_api.add_duties_to_coin(coin_path, duties, access_token)
+    role = get_user_from_token(access_token).role
+    if role is "admin":
+        coins_api.remove_duties_from_coin(coin_path, original_duties, access_token)
+        coins_api.add_duties_to_coin(coin_path, duties, access_token)
     
     if completed and not original_status:
         coins_api.mark_coin_complete(coin_path, access_token)
     if original_status and not completed:
-        coins_api.mark_coin_incomplete(coin_path)
+        coins_api.mark_coin_incomplete(coin_path, access_token)
     
     return RedirectResponse(
             url="/coins",
