@@ -13,12 +13,14 @@ security = HTTPBasic()
 
 
 
-# -----welcome endpoint-----
-@router.get("/api", response_class=JSONResponse)
+# ------------------------------------------------------------------------------------------ 
+# ------------------------------ welcome route -----------------------------------------------
+# ------------------------------------------------------------------------------------------ @router.get("/api", response_class=JSONResponse)
 def root():
     return {"message": "Welcome to the Coins API"}
-
-# -----coin routes-----
+# ------------------------------------------------------------------------------------------ 
+# ------------------------------ coin routes -----------------------------------------------
+# ------------------------------------------------------------------------------------------ 
 
 @router.get("/api/coins", response_class=JSONResponse)
 def list_coins():
@@ -90,7 +92,6 @@ def add_duties_to_coin(
         selected_coin.duties.add(Duty.get(Duty.duty_number == number))
     return coin_to_dict(selected_coin)
 
-# need to authenticate --------------------------------------------------------------
 @router.put("/api/coins/{coin_path}/remove-duties", response_class=JSONResponse)
 def remove_duties_from_coin(
         coin_path,
@@ -123,7 +124,6 @@ def mark_coin_complete(
     updated_coin = Coin.get(Coin.coin_path == coin_path)
     return coin_to_dict(updated_coin)
 
-# need to authenticate --------------------------------------------------------------
 @router.put("/api/coins/{coin_path}/mark-incomplete", response_class=JSONResponse)
 def mark_coin_incomplete(
         coin_path, 
@@ -147,7 +147,9 @@ def list_coin_duties(coin_path):
         duties_list.append(duty_to_dict(duty))
     return duties_list
 
-# -----duties routes-----
+# ------------------------------------------------------------------------------------------ 
+# ------------------------------ duties routes ---------------------------------------------
+# ------------------------------------------------------------------------------------------ 
 
 @router.get("/api/duties", response_class=JSONResponse)
 def list_duties():
@@ -163,7 +165,16 @@ def single_duty(duty_number):
     return duty_to_dict(selected_duty)
 
 @router.post("/api/duties", status_code=201, response_class=JSONResponse)
-def add_duty(duty: NewDuty):
+def add_duty(
+        duty: NewDuty, 
+        access_token: str | None = None, 
+        credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
+        ):
+    if access_token:
+        get_user_from_token(access_token)
+    else:
+        authenticate_api_call(credentials.username, credentials.password, user_db)
+        
     Duty.create(
         duty_number = duty.duty_number,
         description = duty.description
@@ -172,7 +183,17 @@ def add_duty(duty: NewDuty):
     return duty_to_dict(created_duty)
 
 @router.put("/api/duties/{duty_number}/update", response_class=JSONResponse)
-def update_duty_description(duty_number, update: DutyUpdate):
+def update_duty_description(
+        duty_number,
+        update: DutyUpdate, 
+        access_token: str | None = None, 
+        credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
+        ):
+    if access_token:
+        get_user_from_token(access_token)
+    else:
+        authenticate_api_call(credentials.username, credentials.password, user_db)
+    
     selected_duty = Duty.get(Duty.duty_number == duty_number)
     if update.duty_number != selected_duty.duty_number and update.duty_number is not None:
         return "Error: cannot change duty numbers"
