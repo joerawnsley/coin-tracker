@@ -124,13 +124,25 @@ def test_single_duty_page_dispalys_specified_duty(full_database):
     assert "<th>Description</th>" in response.text
     assert "Coins" in response.text
     
-def test_post_create_coin_and_redirect(full_database):
+def test_post_create_coin_and_redirect_user(full_database):
     coin_data = {
         "coin_path": "fiftypence",
         "coin_name": "50 Pence",
         "duties": [12]
     }
     client.post("/login", data={"username": "testuser", "password": "12345678"})
+    response = client.post("/create-coin", data=coin_data, follow_redirects=False)
+       
+    assert response.status_code == 401
+    client.cookies.delete("access_token")
+
+def test_post_create_coin_and_redirect_admin(full_database):
+    coin_data = {
+        "coin_path": "fiftypence",
+        "coin_name": "50 Pence",
+        "duties": [12]
+    }
+    client.post("/login", data={"username": "admin", "password": "admin"})
     response = client.post("/create-coin", data=coin_data, follow_redirects=False)
     
     fifty_pence_coin = Coin.get(Coin.coin_path == "fiftypence")

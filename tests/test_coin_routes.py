@@ -13,9 +13,13 @@ if os.getenv('DB_LOGGING') == 'on':
 # ------------ create test client ----------------
 client = TestClient(app)
 
-test_credentials = "testuser:12345678"
-encoded_credentials = base64.b64encode(test_credentials.encode("utf-8")).decode("utf-8")
-test_headers = {"Authorization": f"Basic {encoded_credentials}"}
+test_user_credentials = "testuser:12345678"
+encoded_user_credentials = base64.b64encode(test_user_credentials.encode("utf-8")).decode("utf-8")
+test_headers = {"Authorization": f"Basic {encoded_user_credentials}"}
+
+test_admin_credentials = "admin:admin"
+encoded_admin_credentials = base64.b64encode(test_admin_credentials.encode("utf-8")).decode("utf-8")
+admin_headers = {"Authorization": f"Basic {encoded_admin_credentials}"}
 
 # ----- GET /coins -----
 
@@ -71,13 +75,13 @@ def test_add_coin_with_no_duties_to_empty_db(empty_database):
         "coin_name": "Going Deeper",
         "coin_path": "deeper",
     }
-    response = client.post("/api/coins", json=coin_data, headers=test_headers)
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
     
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == 'deeper').first() is not None
 
     
-def test_add_coin_with_duties(db_with_duties_but_no_coins):
+def test_add_coin_with_duties_user(db_with_duties_but_no_coins):
     
     assert Coin.select().where(Coin.coin_path == 'deeper').first() is None
 
@@ -87,6 +91,18 @@ def test_add_coin_with_duties(db_with_duties_but_no_coins):
         "duties": ["11", "12"]
     }
     response = client.post("/api/coins", json=coin_data, headers=test_headers)
+    assert response.status_code == 401
+    
+def test_add_coin_with_duties_admin(db_with_duties_but_no_coins):
+    
+    assert Coin.select().where(Coin.coin_path == 'deeper').first() is None
+
+    coin_data = {
+        "coin_name": "Going Deeper",
+        "coin_path": "deeper",
+        "duties": ["11", "12"]
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
     
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == 'deeper').first() is not None
@@ -117,7 +133,7 @@ def test_add_coin_returns_201(db_with_duties_but_no_coins):
         "coin_path": "deeper",
         "duties": ["11", "12"]
     }
-    response = client.post("/api/coins", json=coin_data, headers=test_headers)
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
     assert response.status_code == 201
     
 # PUT routes for /coins
