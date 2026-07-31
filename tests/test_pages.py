@@ -106,11 +106,13 @@ def test_update_and_redirect_on_submit(full_database):
 
 
 def test_create_coin_page_contains_form(full_database):
+    client.post("/login", data={"username": "testuser", "password": "12345678"})
     response = client.get("/create-coin")
     assert "<form" in response.text
     assert "name" in response.text
     assert "path" in response.text
     assert "submit" in response.text
+    client.cookies.delete("access_token")
 
 def test_single_duty_page_dispalys_specified_duty(full_database):
     response = client.get("/duties/6")
@@ -128,6 +130,7 @@ def test_post_create_coin_and_redirect(full_database):
         "coin_name": "50 Pence",
         "duties": [12]
     }
+    client.post("/login", data={"username": "testuser", "password": "12345678"})
     response = client.post("/create-coin", data=coin_data, follow_redirects=False)
     
     fifty_pence_coin = Coin.get(Coin.coin_path == "fiftypence")
@@ -137,8 +140,10 @@ def test_post_create_coin_and_redirect(full_database):
     
     assert response.status_code == 303
     assert response.headers["location"] == "/coins"
+    client.cookies.delete("access_token")
     
 def test_post_delete_coin_and_redirect(full_database):
+    client.post("/login", data={"username": "testuser", "password": "12345678"})
     response = client.post("/delete-coin/deeper", follow_redirects=False)
 
     assemble = Coin.select().where(Coin.coin_path == 'assemble')
@@ -148,5 +153,6 @@ def test_post_delete_coin_and_redirect(full_database):
     
     assert response.status_code == 303
     assert response.headers["location"] == "/coins"
+    client.cookies.delete("access_token")
     
     
