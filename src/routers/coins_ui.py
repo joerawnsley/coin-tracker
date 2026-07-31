@@ -149,15 +149,22 @@ def edit_coin_submit(
     
 @router.get("/create-coin", response_class=HTMLResponse)
 def create_coin_page(request: Request, access_token: Annotated[str | None, Cookie()] = None):
-    all_duties = coins_api.list_duties()
-    return templates.TemplateResponse(
-        request=request,
-        name="create-coin.html",
-        context={
-            "duties": all_duties,
-            "username": get_current_username(access_token)
-        }
-    )
+    try:
+        user = get_user_from_token(access_token)
+        all_duties = coins_api.list_duties()
+        return templates.TemplateResponse(
+            request=request,
+            name="create-coin.html",
+            context={
+                "duties": all_duties,
+                "username": user.username
+            }
+        )
+    except HTTPException:
+        return RedirectResponse(
+                url="/coins?error=unauthorised", 
+                status_code=status.HTTP_303_SEE_OTHER
+            )
 
 @router.post("/create-coin")
 def create_coin_submit(
