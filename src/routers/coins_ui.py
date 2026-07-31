@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, status, Cookie
+from fastapi import APIRouter, Request, Form, status, Cookie, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
 from src.input_models import NewCoin, NewDuty, DutyUpdate
 from fastapi.templating import Jinja2Templates
@@ -16,6 +16,11 @@ templates = Jinja2Templates(directory="src/templates")
 
 @router.get("/", response_class=HTMLResponse)
 def welcome_page(request: Request, access_token: Annotated[str | None, Cookie()] = None):
+    try:
+        username = get_user_from_token(access_token).username
+    except HTTPException:
+        username = None
+        
     subpages = [
         {"title": "All Coins",
          "endpoint": "coins_list_page"
@@ -29,7 +34,7 @@ def welcome_page(request: Request, access_token: Annotated[str | None, Cookie()]
         name="welcome.html",
         context={
             "subpages": subpages,
-            "username": get_current_username(access_token)
+            "username": username
         }
     )
 
@@ -39,19 +44,29 @@ def welcome_page(request: Request, access_token: Annotated[str | None, Cookie()]
 
 @router.get("/coins", response_class=HTMLResponse)
 def coins_list_page(request: Request, access_token: Annotated[str | None, Cookie()] = None, error: str | None = None):
+    try:
+        username = get_user_from_token(access_token).username
+    except HTTPException:
+        username = None
+    
     coins = coins_api.list_coins()
     return templates.TemplateResponse(
         request=request,
         name="coins.html",
         context={
             "coins": coins,
-            "username": get_current_username(access_token),
+            "username": username,
             "error": error
         }
     )
 
 @router.get("/duties", response_class=HTMLResponse)
 def duties_list_page(request: Request, access_token: Annotated[str | None, Cookie()] = None):
+    try:
+        username = get_user_from_token(access_token).username
+    except HTTPException:
+        username = None
+        
     duties = coins_api.list_duties()
     return templates.TemplateResponse(
         request=request,
@@ -59,12 +74,17 @@ def duties_list_page(request: Request, access_token: Annotated[str | None, Cooki
         context={
             "duties": duties,
             "page_mode": "all",
-            "username": get_current_username(access_token)
+            "username": username
         }
     )
 
 @router.get("/duties/{duty_number}", response_class=HTMLResponse)
 def single_duty_page(duty_number: int, request: Request, access_token: Annotated[str | None, Cookie()] = None):
+    try:
+        username = get_user_from_token(access_token).username
+    except HTTPException:
+        username = None
+    
     duties = [coins_api.single_duty(duty_number)]
     return templates.TemplateResponse(
         request=request,
@@ -72,7 +92,7 @@ def single_duty_page(duty_number: int, request: Request, access_token: Annotated
         context={
             "duties": duties,
             "page_mode": "single",
-            "username": get_current_username(access_token)
+            "username": username
         }
     )
 
@@ -96,7 +116,7 @@ def edit_coin_page(request: Request, coin_path: str, access_token: Annotated[str
                 "username": user.username
             }
         )
-    except:
+    except HTTPException:
         return RedirectResponse(
                     url="/coins?error=unauthorised", 
                     status_code=status.HTTP_303_SEE_OTHER
