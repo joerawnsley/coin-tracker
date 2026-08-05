@@ -78,17 +78,17 @@
     "users": [
         {
             "username": "joe",
-            "hashed_password": "fakehashedsecret",
+            "plaintext_password": "secret",
             "role": "user"
         },
         {
             "username": "admin",
-            "hashed_password": "fakehashedadmin",
+            "plaintext_password": "admin",
             "role": "admin"
         },
         {
             "username": "testuser",
-            "hashed_password": "fakehashed12345678",
+            "plaintext_password": "12345678",
             "role": "user"
         }
     ]

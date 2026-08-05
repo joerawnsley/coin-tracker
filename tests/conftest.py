@@ -3,10 +3,12 @@ import os
 
 import dotenv
 import pytest
+from argon2 import PasswordHasher
 
 from src.database import db
 from src.database_models import Coin, Duty, User
 
+ph = PasswordHasher()
 dotenv.load_dotenv()
 
 if os.getenv("DB_ENVIRONMENT") == "prod":
@@ -29,6 +31,14 @@ with open("seed_data/seed_data.json") as json_data:
     all_duties = seed_data["duties"]
     all_users = seed_data["users"]
 
+hashed_users = [
+    {
+        "username": user["username"],
+        "role": user["role"],
+        "hashed_password": ph.hash(user["plaintext_password"])
+    }
+    for user in all_users
+]
 
 # --------------- test fixtures -----------------
 @pytest.fixture()
@@ -36,7 +46,7 @@ def empty_database():
     # contains only users but no coins or duties
     db.connect()
     db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
-    User.insert_many(all_users).execute()
+    User.insert_many(hashed_users).execute()
 
     yield
 
@@ -52,7 +62,7 @@ def full_database():
     db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
     Coin.insert_many(all_coins).execute()
     Duty.insert_many(all_duties).execute()
-    User.insert_many(all_users).execute()
+    User.insert_many(hashed_users).execute()
 
     yield
 
@@ -68,7 +78,7 @@ def db_with_duties_but_no_coins():
     db.connect()
     db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
     Duty.insert_many(all_duties).execute()
-    User.insert_many(all_users).execute()
+    User.insert_many(hashed_users).execute()
 
     yield
 
