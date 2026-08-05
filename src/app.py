@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from src.routers import coins_api, coins_ui
 
 app = FastAPI()
