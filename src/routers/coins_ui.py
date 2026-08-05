@@ -136,7 +136,7 @@ def edit_coin_submit(
     original_status = original_coin["isComplete"]
     
     role = get_user_from_token(access_token).role
-    if role is "admin":
+    if role == "admin":
         coins_api.remove_duties_from_coin(coin_path, original_duties, access_token)
         coins_api.add_duties_to_coin(coin_path, duties, access_token)
     
