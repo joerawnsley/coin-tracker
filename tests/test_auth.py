@@ -1,4 +1,4 @@
-from src.auth import UserInDB, get_user_from_username, get_user_from_token, fake_users_db
+from src.auth import User, get_user_from_username, get_user_from_token, fake_users_db
 from src.routers.coins_ui import login
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
@@ -7,7 +7,7 @@ import pytest
 
 def test_get_user_returns_correct_type():
     user_in_db = get_user_from_username(fake_users_db, "joe")
-    assert isinstance(user_in_db, UserInDB)
+    assert isinstance(user_in_db, User)
     
 def test_get_user_returns_correct_data():
     user_in_db = get_user_from_username(fake_users_db, "joe")
@@ -15,7 +15,7 @@ def test_get_user_returns_correct_data():
     assert user_in_db.username == "joe"
     
 def test_get_user_from_token(mocker):
-    mocker.patch("src.auth.decode_token", return_value=UserInDB(
+    mocker.patch("src.auth.decode_token", return_value=User(
         username="joe",
         hashed_password="fakehashedsecret",
         role="user"
