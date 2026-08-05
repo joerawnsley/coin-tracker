@@ -1,5 +1,7 @@
 from typing import Annotated
 
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import APIRouter, Cookie, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -8,13 +10,13 @@ from src.auth import (
     get_current_username,
     get_user_from_token,
     get_user_from_username,
-    hash_password,
 )
 from src.input_models import NewCoin
 from src.routers import coins_api
 
 router = APIRouter()
 templates = Jinja2Templates(directory="src/templates")
+ph = PasswordHasher()
 
 # =====================================================================================
 #               - - - - - - - - - - WELCOME ROUTE - - - - - - - - -
@@ -237,12 +239,20 @@ def login(username: str = Form(...), password: str = Form(...)):
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    hashed_password = hash_password(password)
-    if hashed_password != user_data.hashed_password:
+    # hashed_password = hash_password(password)
+    # if hashed_password != user_data.hashed_password:
+    #     return RedirectResponse(
+    #         url="/login?error=Invalid credentials",
+    #         status_code=status.HTTP_303_SEE_OTHER,
+    #     )
+    try:
+        ph.verify(user_data.hashed_password, password)
+    except (VerificationError, VerifyMismatchError):
         return RedirectResponse(
             url="/login?error=Invalid credentials",
             status_code=status.HTTP_303_SEE_OTHER,
         )
+
 
     response = RedirectResponse(url="/coins", status_code=status.HTTP_303_SEE_OTHER)
 

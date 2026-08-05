@@ -1,9 +1,12 @@
 import pytest
+from argon2 import PasswordHasher
 from fastapi import HTTPException
 
 from src.auth import get_user_from_token, get_user_from_username
 from src.database_models import User
 from src.routers.coins_ui import login
+
+ph = PasswordHasher()
 
 
 def test_get_user_returns_correct_type(full_database):
@@ -13,7 +16,7 @@ def test_get_user_returns_correct_type(full_database):
 
 def test_get_user_returns_correct_data(full_database):
     user_in_db = get_user_from_username("joe")
-    assert user_in_db.hashed_password == "fakehashedsecret"
+    ph.verify(user_in_db.hashed_password, "secret")
     assert user_in_db.username == "joe"
 
 

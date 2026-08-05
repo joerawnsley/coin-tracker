@@ -1,7 +1,10 @@
+from argon2 import PasswordHasher
+from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import Cookie, HTTPException, status
 
 from src.database_models import User
 
+ph = PasswordHasher()
 
 def fake_users_db():
     return {
@@ -45,9 +48,9 @@ def get_user_from_username(username: str):
         return User(**user_dict)
 
 
-def hash_password(password: str):
-    # not yet secure
-    return "fakehashed" + password
+# def hash_password(password: str):
+#     # not yet secure
+#     return "fakehashed" + password
 
 
 def decode_token(token: str):
@@ -83,8 +86,15 @@ def authenticate_api_call(username, password):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
-    hashed_password = hash_password(password)
-    if hashed_password != user_data.hashed_password:
+    # hashed_password = hash_password(password)
+    # if hashed_password != user_data.hashed_password:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="Invalid authentication credentials",
+    #     )
+    try:
+        ph.verify(user_data.hashed_password, password)
+    except (VerificationError, VerifyMismatchError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
