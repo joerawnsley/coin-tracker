@@ -7,7 +7,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from src.auth import (
-    get_current_username,
     get_user_from_token,
     get_user_from_username,
 )
@@ -226,7 +225,7 @@ def login_page(
     return templates.TemplateResponse(
         request=request,
         name="login.html",
-        context={"username": get_current_username(access_token), "error": error},
+        context={"username": get_user_from_token(access_token).username if access_token else None, "error": error},
     )
 
 
@@ -238,13 +237,6 @@ def login(username: str = Form(...), password: str = Form(...)):
             url="/login?error=Invalid credentials",
             status_code=status.HTTP_303_SEE_OTHER,
         )
-
-    # hashed_password = hash_password(password)
-    # if hashed_password != user_data.hashed_password:
-    #     return RedirectResponse(
-    #         url="/login?error=Invalid credentials",
-    #         status_code=status.HTTP_303_SEE_OTHER,
-    #     )
     try:
         ph.verify(user_data.hashed_password, password)
     except (VerificationError, VerifyMismatchError):
