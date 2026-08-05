@@ -1,5 +1,7 @@
+import os
+
+import dotenv
 from peewee import PostgresqlDatabase, SqliteDatabase
-import os, dotenv
 
 dotenv.load_dotenv()
 
