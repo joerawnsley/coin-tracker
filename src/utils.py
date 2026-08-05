@@ -25,13 +25,4 @@ def duty_to_dict(duty):
         coins = set([coin.coin_name for coin in duty.coins])
     )
 
-def get_user_dictionary():
-    query = User.select().order_by(User.username)
-    user_dictionary = {}
-    for user in query:
-        user_dictionary[user.username] = {
-            "username": user.username,
-            "role": user.role,
-            "hashed_password": user.hashed_password
-        }
-    return user_dictionary
+

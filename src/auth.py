@@ -1,37 +1,41 @@
 from fastapi import Cookie, HTTPException, status
-from pydantic import BaseModel
-from src.utils import get_user_dictionary
+from src.database_models import User
 
-fake_users_db = {
-    "joe": {
-        "username": "joe",
-        "hashed_password": "fakehashedsecret",
-        "role": "user"
-    },
-    "admin": {
-        "username": "admin",
-        "hashed_password": "fakehashedadmin",
-        "role": "admin"
-    },
-    "testuser": {
-            "username": "testuser",
-            "hashed_password": "fakehashed12345678",
-            "role": "user"
+def fake_users_db():
+    return {
+            "joe": {
+                "username": "joe",
+                "hashed_password": "fakehashedsecret",
+                "role": "user"
+                },
+            "admin": {
+                "username": "admin",
+                "hashed_password": "fakehashedadmin",
+                "role": "admin"
+                },
+            "testuser": {
+                "username": "testuser",
+                "hashed_password": "fakehashed12345678",
+                "role": "user"
+                }
+            }
+
+def get_user_dict_from_db():
+    query = User.select().order_by(User.username)
+    user_dictionary = {}
+    for user in query:
+        user_dictionary[user.username] = {
+            "username": user.username,
+            "role": user.role,
+            "hashed_password": user.hashed_password
         }
-}
-
-real_user_db = get_user_dictionary()
+    return user_dictionary
 
 
-user_db = real_user_db
-
-
-class User(BaseModel):
-    username: str
-    role: str
-    hashed_password: str
+user_db = get_user_dict_from_db
     
 def get_user_from_username(db, username: str):
+    db = user_db()
     if username in db:
         user_dict = db[username]
         return User(**user_dict)
@@ -43,7 +47,8 @@ def hash_password(password: str):
 
 def decode_token(token: str):
     # not yet secure
-    user = get_user_from_username(user_db, token)
+    users = user_db()
+    user = get_user_from_username(users, token)
     return user
 
 
@@ -63,7 +68,8 @@ def get_user_from_token(access_token):
     return user
 
 def authenticate_api_call(username, password, db):
-    user_data = get_user_from_username(db, username)
+    all_users = user_db()
+    user_data = get_user_from_username(all_users, username)
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
