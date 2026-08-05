@@ -1,4 +1,5 @@
 import uuid
+from src.database_models import User
 
 def is_valid_uuid(val):
     try:
@@ -23,3 +24,14 @@ def duty_to_dict(duty):
         description = duty.description,
         coins = set([coin.coin_name for coin in duty.coins])
     )
+
+def get_user_dictionary():
+    query = User.select().order_by(User.username)
+    user_dictionary = {}
+    for user in query:
+        user_dictionary[user.username] = {
+            "username": user.username,
+            "role": user.role,
+            "hashed_password": user.hashed_password
+        }
+    return user_dictionary

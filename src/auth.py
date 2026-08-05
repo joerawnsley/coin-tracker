@@ -1,5 +1,6 @@
 from fastapi import Cookie, HTTPException, status
 from pydantic import BaseModel
+from src.utils import get_user_dictionary
 
 fake_users_db = {
     "joe": {
@@ -19,16 +20,10 @@ fake_users_db = {
         }
 }
 
-# placeholder for real db function
-# def list_all_users():
-#     query = User.select().order_by(User.username)
-#     user_list = []
-#     for user in query:
-#         user_list.append(user_to_dict(user))
-#     return user_list
+real_user_db = get_user_dictionary()
 
 
-user_db = fake_users_db
+user_db = real_user_db
 
 
 class User(BaseModel):
