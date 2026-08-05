@@ -1,16 +1,17 @@
-from src.auth import User, get_user_from_username, get_user_from_token, fake_users_db
+from src.auth import get_user_from_username, get_user_from_token, user_db
+from src.database_models import User
 from src.routers.coins_ui import login
 from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 import pytest
 
 
-def test_get_user_returns_correct_type():
-    user_in_db = get_user_from_username(fake_users_db, "joe")
+def test_get_user_returns_correct_type(full_database):
+    user_in_db = get_user_from_username(user_db, "joe")
     assert isinstance(user_in_db, User)
     
-def test_get_user_returns_correct_data():
-    user_in_db = get_user_from_username(fake_users_db, "joe")
+def test_get_user_returns_correct_data(full_database):
+    user_in_db = get_user_from_username(user_db, "joe")
     assert user_in_db.hashed_password == "fakehashedsecret"
     assert user_in_db.username == "joe"
     
@@ -29,7 +30,7 @@ def test_get_current_user_not_exists(mocker):
     with pytest.raises(HTTPException):
         get_user_from_token("alice")
 
-def test_login_converts_form_submission_to_token():
+def test_login_converts_form_submission_to_token(full_database):
     response = login(username="joe", password='secret')
     set_cookie_header = response.headers.get("set-cookie")
     assert response.status_code == 303
