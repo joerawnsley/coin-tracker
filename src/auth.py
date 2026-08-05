@@ -19,22 +19,27 @@ fake_users_db = {
         }
 }
 
+# placeholder for real db function
+# def list_all_users():
+#     query = User.select().order_by(User.username)
+#     user_list = []
+#     for user in query:
+#         user_list.append(user_to_dict(user))
+#     return user_list
+
+
 user_db = fake_users_db
 
 
 class User(BaseModel):
     username: str
-    email: str | None = None
-    disabled: bool | None = None
     role: str
-
-class UserInDB(User):
     hashed_password: str
     
 def get_user_from_username(db, username: str):
     if username in db:
         user_dict = db[username]
-        return UserInDB(**user_dict)
+        return User(**user_dict)
     
     
 def hash_password(password: str):
