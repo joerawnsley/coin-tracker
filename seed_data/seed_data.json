@@ -74,5 +74,22 @@
             "duty_number": 13,
             "description": "Accept ownership of changes; embody the DevOps culture of 'you build it, you run it', with a relentless focus on the user experience."
         }
+    ],
+    "users": [
+        {
+            "username": "joe",
+            "hashed_password": "fakehashedsecret",
+            "role": "user"
+        },
+        {
+            "username": "admin",
+            "hashed_password": "fakehashedadmin",
+            "role": "admin"
+        },
+        {
+            "username": "testuser",
+            "hashed_password": "fakehashed12345678",
+            "role": "user"
+        }
     ]
 }

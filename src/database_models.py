@@ -37,3 +37,12 @@ class Coin(BaseModel):
     
     class Meta:
         table_name = 'coins'
+
+class User(BaseModel):
+    id = UUIDField(column_name='user_uuid', default=uuid.uuid4, primary_key=True)
+    username = TextField(unique=True)
+    role = TextField()
+    hashed_password = TextField()
+
+    class Meta:
+        table_name = 'users'
