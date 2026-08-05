@@ -40,7 +40,7 @@ def add_coin(
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password)
     
     if user.role != "admin":
         raise HTTPException(
@@ -75,7 +75,7 @@ def delete_coin(coin_path,
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password, user_db) 
+        user = authenticate_api_call(credentials.username, credentials.password) 
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -99,7 +99,7 @@ def add_duties_to_coin(
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -122,7 +122,7 @@ def remove_duties_from_coin(
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -143,7 +143,7 @@ def mark_coin_complete(
     if access_token:
         get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        authenticate_api_call(credentials.username, credentials.password)
         
     Coin.update({Coin.is_complete: True}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
@@ -158,7 +158,7 @@ def mark_coin_incomplete(
     if access_token:
         get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password, user_db)
+        authenticate_api_call(credentials.username, credentials.password)
         
     Coin.update({Coin.is_complete: False}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
@@ -199,7 +199,7 @@ def add_duty(
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -224,7 +224,7 @@ def update_duty_description(
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password, user_db)
+        user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

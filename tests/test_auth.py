@@ -7,11 +7,11 @@ import pytest
 
 
 def test_get_user_returns_correct_type(full_database):
-    user_in_db = get_user_from_username(user_db, "joe")
+    user_in_db = get_user_from_username("joe")
     assert isinstance(user_in_db, User)
     
 def test_get_user_returns_correct_data(full_database):
-    user_in_db = get_user_from_username(user_db, "joe")
+    user_in_db = get_user_from_username("joe")
     assert user_in_db.hashed_password == "fakehashedsecret"
     assert user_in_db.username == "joe"
     

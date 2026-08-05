@@ -217,7 +217,7 @@ def login_page(request: Request, access_token: Annotated[str | None, Cookie()] =
     
 @router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
-    user_data = get_user_from_username(user_db, username)
+    user_data = get_user_from_username(username)
     if not user_data:
         return RedirectResponse(
             url="/login?error=Invalid credentials", 

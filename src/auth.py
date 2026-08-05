@@ -34,10 +34,10 @@ def get_user_dict_from_db():
 
 user_db = get_user_dict_from_db
     
-def get_user_from_username(db, username: str):
-    db = user_db()
-    if username in db:
-        user_dict = db[username]
+def get_user_from_username(username: str):
+    all_user_dict = user_db()
+    if username in all_user_dict:
+        user_dict = all_user_dict[username]
         return User(**user_dict)
     
     
@@ -47,8 +47,7 @@ def hash_password(password: str):
 
 def decode_token(token: str):
     # not yet secure
-    users = user_db()
-    user = get_user_from_username(users, token)
+    user = get_user_from_username(token)
     return user
 
 
@@ -67,9 +66,8 @@ def get_user_from_token(access_token):
         )
     return user
 
-def authenticate_api_call(username, password, db):
-    all_users = user_db()
-    user_data = get_user_from_username(all_users, username)
+def authenticate_api_call(username, password):
+    user_data = get_user_from_username(username)
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
