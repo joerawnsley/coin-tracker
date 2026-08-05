@@ -1,17 +1,20 @@
-import json, os
+import json
+import os
+
 from src.database import db
 from src.database_models import Coin, Duty, User
 
-db_environment = os.getenv('DB_ENVIRONMENT')
+db_environment = os.getenv("DB_ENVIRONMENT")
 
-if not db_environment == 'prod':
-    raise Exception('must set db environment to prod before seeding')
+assert db_environment == "prod", (
+    "must set DB_ENVIRONMENT in .env to prod before seeding"
+)
 
-with open('seed_data/seed_data.json') as json_data:
+with open("seed_data/seed_data.json") as json_data:
     seed_data = json.load(json_data)
-    all_coins = seed_data['coins']
-    all_duties = seed_data['duties']
-    all_users = seed_data['users']
+    all_coins = seed_data["coins"]
+    all_duties = seed_data["duties"]
+    all_users = seed_data["users"]
 print("connecting to database")
 db.connect()
 print("clearing data")
