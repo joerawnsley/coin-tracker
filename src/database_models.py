@@ -56,3 +56,15 @@ class User(BaseModel):
 
     class Meta:
         table_name = "users"
+
+class UserRequest(BaseModel):
+    id = UUIDField(column_name="request_id", default=uuid.uuid4, primary_key=True)
+    username = TextField()
+    method = TextField()
+    endpoint = TextField()
+    body = TextField()
+    status = TextField(default="unknown")
+    timestamp = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
+
+    class Meta:
+        table_name = "user_requests"
