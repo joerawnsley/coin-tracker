@@ -5,9 +5,7 @@ import os
 from fastapi.testclient import TestClient
 
 from src.app import app
-from src.database import db
-from src.database_models import Coin, Duty
-from src.utils import coin_to_dict, is_valid_uuid
+from src.database_models import Duty
 
 if os.getenv("DB_LOGGING") == "on":
     logging.getLogger("peewee").addHandler(logging.StreamHandler())

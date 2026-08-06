@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 
@@ -101,8 +100,8 @@ def test_add_two_duties_to_coin(full_database):
     duty_10 = Duty.get(Duty.duty_number == 10)
     houston.duties.add([duty_5, duty_7, duty_10])
 
-    houston_duties = set([duty.duty_number for duty in houston.duties])
-    assert houston_duties == set([5, 7, 10])
+    houston_duties = {duty.duty_number for duty in houston.duties}
+    assert houston_duties == {5, 7, 10}
     assert len(houston_duties) == 3
 
 

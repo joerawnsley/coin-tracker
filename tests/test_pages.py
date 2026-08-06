@@ -105,8 +105,8 @@ def test_update_and_redirect_on_submit(full_database):
     response = client.post("/edit-coin/houston", data=updates, follow_redirects=False)
 
     houston_coin = Coin.get(Coin.coin_path == "houston")
-    houston_duties = set([duty.duty_number for duty in houston_coin.duties])
-    assert houston_duties == set([5, 7, 10])
+    houston_duties = {duty.duty_number for duty in houston_coin.duties}
+    assert houston_duties == {5, 7, 10}
     assert houston_coin.is_complete == True
 
     assert response.status_code == 303
@@ -150,8 +150,8 @@ def test_post_create_coin_and_redirect_admin(full_database):
     response = client.post("/create-coin", data=coin_data, follow_redirects=False)
 
     fifty_pence_coin = Coin.get(Coin.coin_path == "fiftypence")
-    fifty_pence_duties = set([duty.duty_number for duty in fifty_pence_coin.duties])
-    assert set(fifty_pence_duties) == set([12])
+    fifty_pence_duties = {duty.duty_number for duty in fifty_pence_coin.duties}
+    assert set(fifty_pence_duties) == {12}
     assert fifty_pence_coin.is_complete == False
 
     assert response.status_code == 303
