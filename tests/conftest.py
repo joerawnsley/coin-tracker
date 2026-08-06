@@ -6,7 +6,7 @@ import pytest
 from argon2 import PasswordHasher
 
 from src.database import db
-from src.database_models import Coin, Duty, User
+from src.database_models import Coin, Duty, User, UserRequest
 
 ph = PasswordHasher()
 dotenv.load_dotenv()
@@ -46,12 +46,12 @@ hashed_users = [
 def empty_database():
     # contains only users but no coins or duties
     db.connect()
-    db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+    db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
     User.insert_many(hashed_users).execute()
 
     yield
 
-    db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+    db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
     if not db.is_closed():
         db.close()
 
@@ -60,14 +60,14 @@ def empty_database():
 def full_database():
 
     db.connect()
-    db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+    db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
     Coin.insert_many(all_coins).execute()
     Duty.insert_many(all_duties).execute()
     User.insert_many(hashed_users).execute()
 
     yield
 
-    db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+    db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
 
     if not db.is_closed():
         db.close()
@@ -77,13 +77,13 @@ def full_database():
 def db_with_duties_but_no_coins():
 
     db.connect()
-    db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+    db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
     Duty.insert_many(all_duties).execute()
     User.insert_many(hashed_users).execute()
 
     yield
 
-    db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+    db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
 
     if not db.is_closed():
         db.close()

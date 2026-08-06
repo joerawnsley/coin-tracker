@@ -4,7 +4,7 @@ import os
 from argon2 import PasswordHasher
 
 from src.database import db
-from src.database_models import Coin, Duty, User
+from src.database_models import Coin, Duty, User, UserRequest
 
 ph = PasswordHasher()
 db_environment = os.getenv("DB_ENVIRONMENT")
@@ -32,9 +32,9 @@ hashed_users = [
 print("connecting to database")
 db.connect()
 print("clearing existing data")
-db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+db.drop_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
 print("building coins and duties tables")
-db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User])
+db.create_tables([Coin, Duty, Coin.duties.get_through_model(), User, UserRequest])
 Coin.insert_many(all_coins).execute()
 Duty.insert_many(all_duties).execute()
 User.insert_many(hashed_users).execute()
