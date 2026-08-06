@@ -11,10 +11,9 @@ permissions:
     id-token: write
 
 env:
-  # DB_LOCATION: local
-  # REMOTE_SCHEMA: test
   DB_ENVIRONMENT: ltest
   DB_LOGGING: off
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 # also dockerfile should set up virtual environment
 
