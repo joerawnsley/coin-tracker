@@ -9,20 +9,29 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from peewee import IntegrityError
 
 from src.auth import authenticate_api_call, get_user_from_token
-from src.database_models import Coin, Duty
+from src.database_models import Coin, Duty, UserRequest
 from src.input_models import DutyUpdate, NewCoin, NewDuty
 from src.utils import coin_to_dict, duty_to_dict
 
 router = APIRouter()
 security = HTTPBasic()
 
+def log_request(username: str, method: str, endpoint: str, body: str, status: str = "unknown"):
 
+    UserRequest.create(
+        username=username,
+        method=method,
+        endpoint=endpoint,
+        body=body,
+        status=status
+    )
 
 # ------------------------------------------------------------------------------------------ 
 # ------------------------------ welcome route -----------------------------------------------
 # ------------------------------------------------------------------------------------------ 
 @router.get("/api", response_class=JSONResponse)
 def root():
+    log_request(username="anonymous", method="GET", endpoint="/api", body="", status="success")
     return {"message": "Welcome to the Coins API"}
 # ------------------------------------------------------------------------------------------ 
 # ------------------------------ coin routes -----------------------------------------------
@@ -34,6 +43,7 @@ def list_coins():
     coin_list = []
     for coin in query:
         coin_list.append(coin_to_dict(coin))
+    log_request(username="anonymous", method="GET", endpoint="/api/coins", body="", status="success")
     return coin_list
 
 @router.post("/api/coins", status_code=201, response_class=JSONResponse)
@@ -49,6 +59,7 @@ def add_coin(
         user = authenticate_api_call(credentials.username, credentials.password)
     
     if user.role != "admin":
+        log_request(username=user.username, method="POST", endpoint="/api/coins", body=str(coin), status="unauthorized")
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials or authorization",
@@ -64,12 +75,14 @@ def add_coin(
             saved_coin.duties.add(Duty.get(Duty.duty_number == int(number)))
     
     created_coin = Coin.get(Coin.coin_path == coin.coin_path)
+    log_request(username=user.username, method="POST", endpoint="/api/coins", body=str(coin), status="success")
     return coin_to_dict(created_coin)
     
 
 @router.get("/api/coins/{coin_path}", response_class=JSONResponse)
 def single_coin(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
+    log_request(username="anonymous", method="GET", endpoint=f"/api/coins/{coin_path}", body="", status="success")
     return coin_to_dict(selected_coin)
 
 @router.delete("/api/coins/{coin_path}")
@@ -81,8 +94,10 @@ def delete_coin(coin_path,
     if access_token:
         user = get_user_from_token(access_token)
     else:
-        user = authenticate_api_call(credentials.username, credentials.password) 
+        user = authenticate_api_call(credentials.username, credentials.password)
+         
     if user.role != "admin":
+        log_request(username=user.username, method="DELETE", endpoint=f"/api/coins/{coin_path}", body="", status="unauthorized")
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials or authorization",
@@ -90,8 +105,10 @@ def delete_coin(coin_path,
     
     try:
         Coin.delete().where(Coin.coin_path == coin_path).execute()
+        log_request(username=user.username, method="DELETE", endpoint=f"/api/coins/{coin_path}", body="", status="success")
         return "Coin deleted"
     except IntegrityError:
+        log_request(username=user.username, method="DELETE", endpoint=f"/api/coins/{coin_path}", body="", status="failure")
         return "must remove associated duties before deleting coin"
 
 @router.put("/api/coins/{coin_path}/add-duties", response_class=JSONResponse)
@@ -107,6 +124,7 @@ def add_duties_to_coin(
     else:
         user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
+        log_request(username=user.username, method="PUT", endpoint=f"/api/coins/{coin_path}/add-duties", body=str(duties), status="unauthorized")
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials or authorization",
@@ -115,6 +133,8 @@ def add_duties_to_coin(
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
         selected_coin.duties.add(Duty.get(Duty.duty_number == number))
+
+    log_request(username=user.username, method="PUT", endpoint=f"/api/coins/{coin_path}/add-duties", body=str(duties), status="success")
     return coin_to_dict(selected_coin)
 
 @router.put("/api/coins/{coin_path}/remove-duties", response_class=JSONResponse)
@@ -130,6 +150,7 @@ def remove_duties_from_coin(
     else:
         user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
+        log_request(username=user.username, method="PUT", endpoint=f"/api/coins/{coin_path}/remove-duties", body=str(duties), status="unauthorized")
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials or authorization",
@@ -138,6 +159,7 @@ def remove_duties_from_coin(
     selected_coin = Coin.get(Coin.coin_path == coin_path)
     for number in duties:
         selected_coin.duties.remove(Duty.get(Duty.duty_number == number))
+    log_request(username=user.username, method="PUT", endpoint=f"/api/coins/{coin_path}/remove-duties", body=str(duties), status="success")
     return coin_to_dict(selected_coin)
 
 @router.put("/api/coins/{coin_path}/mark-complete", response_class=JSONResponse)
@@ -147,12 +169,13 @@ def mark_coin_complete(
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
     ):
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password)
-        
+        user = authenticate_api_call(credentials.username, credentials.password)
+
     Coin.update({Coin.is_complete: True}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
+    log_request(username=user.username, method="PUT", endpoint=f"/api/coins/{coin_path}/mark-complete", body="", status="success")
     return coin_to_dict(updated_coin)
 
 @router.put("/api/coins/{coin_path}/mark-incomplete", response_class=JSONResponse)
@@ -162,12 +185,13 @@ def mark_coin_incomplete(
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
     if access_token:
-        get_user_from_token(access_token)
+        user = get_user_from_token(access_token)
     else:
-        authenticate_api_call(credentials.username, credentials.password)
-        
+        user = authenticate_api_call(credentials.username, credentials.password)
+
     Coin.update({Coin.is_complete: False}).where(Coin.coin_path == coin_path).execute()
     updated_coin = Coin.get(Coin.coin_path == coin_path)
+    log_request(username=user.username, method="PUT", endpoint=f"/api/coins/{coin_path}/mark-incomplete", body="", status="success")
     return coin_to_dict(updated_coin)
 
 @router.get("/api/coins/{coin_path}/list-duties", response_class=JSONResponse)
@@ -176,6 +200,7 @@ def list_coin_duties(coin_path):
     duties_list = []
     for duty in selected_coin.duties:
         duties_list.append(duty_to_dict(duty))
+    log_request(username="anonymous", method="GET", endpoint=f"/api/coins/{coin_path}/list-duties", body="", status="success")
     return duties_list
 
 # ------------------------------------------------------------------------------------------ 
@@ -188,11 +213,13 @@ def list_duties():
     duty_list = []
     for duty in query:
         duty_list.append(duty_to_dict(duty))
+    log_request(username="anonymous", method="GET", endpoint="/api/duties", body="", status="success")
     return duty_list
 
 @router.get("/api/duties/{duty_number}", response_class=JSONResponse)
 def single_duty(duty_number):
     selected_duty = Duty.get(Duty.duty_number == duty_number)
+    log_request(username="anonymous", method="GET", endpoint=f"/api/duties/{duty_number}", body="", status="success")
     return duty_to_dict(selected_duty)
 
 @router.post("/api/duties", status_code=201, response_class=JSONResponse)
@@ -207,6 +234,7 @@ def add_duty(
     else:
         user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
+        log_request(username=user.username, method="POST", endpoint="/api/duties", body=str(duty), status="unauthorized")
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials or authorization",
@@ -217,6 +245,7 @@ def add_duty(
         description = duty.description
     )
     created_duty = Duty.get(Duty.duty_number == duty.duty_number)
+    log_request(username=user.username, method="POST", endpoint="/api/duties", body=str(duty), status="success")
     return duty_to_dict(created_duty)
 
 @router.put("/api/duties/{duty_number}/update", response_class=JSONResponse)
@@ -232,6 +261,7 @@ def update_duty_description(
     else:
         user = authenticate_api_call(credentials.username, credentials.password)
     if user.role != "admin":
+        log_request(username=user.username, method="PUT", endpoint=f"/api/duties/{duty_number}/update", body=str(update), status="unauthorized")
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials or authorization",
@@ -243,8 +273,10 @@ def update_duty_description(
     
     selected_duty.description = update.description
     selected_duty.save(only=[Duty.description])
+    log_request(username=user.username, method="PUT", endpoint=f"/api/duties/{duty_number}/update", body=str(update), status="success")
     return selected_duty
 
 @router.delete("/api/duties/{duty_number}", response_class=PlainTextResponse)
-def delete_duty():
+def delete_duty(duty_number):
+    log_request(username="anonymous", method="DELETE", endpoint=f"/api/duties/{duty_number}", body="", status="unauthorized")
     return "Error: Duties are forever. They cannot be deleted."
