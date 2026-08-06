@@ -1,3 +1,6 @@
+import os
+
+import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import HTTPException, status
@@ -31,13 +34,13 @@ def get_user_from_username(username: str):
         return User(**user_dict)
 
 
-def decode_token(token: str):
-    # not yet secure
-    # placeholder for JWT base64 decoding logic
-    #JWT
-    # maybe don't need this function at all, just put all the logic in get_user_from_token
-    user = get_user_from_username(token)
-    return user
+# def decode_token(token: str):
+#     # not yet secure
+#     # placeholder for JWT base64 decoding logic
+#     #JWT
+#     # maybe don't need this function at all, just put all the logic in get_user_from_token
+#     user = get_user_from_username(token)
+#     return user
 
 
 def get_user_from_token(access_token):
@@ -49,18 +52,17 @@ def get_user_from_token(access_token):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
         )
-    token = (
-        access_token.replace("Bearer ", "")
-        if access_token.startswith("Bearer ")
-        else access_token
-    )
-    user = decode_token(token)
-    if not user:
+    
+    decoded_token = jwt.decode(access_token, os.getenv("JWT_SECRET"), algorithms=["HS256"])
+    username = decoded_token.get("sub")
+    user_data = get_user_from_username(username)
+    
+    if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
-    return user
+    return user_data
 
 
 def authenticate_api_call(username, password):
