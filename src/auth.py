@@ -50,7 +50,7 @@ def get_user_from_token(access_token):
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Not authorized",
         )
     
     decoded_token = jwt.decode(access_token, os.getenv("JWT_SECRET"), algorithms=["HS256"])
@@ -60,7 +60,7 @@ def get_user_from_token(access_token):
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid authorization credentials",
         )
     return user_data
 
@@ -70,13 +70,13 @@ def authenticate_api_call(username, password):
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid authorization credentials",
         )
     try:
         ph.verify(user_data.hashed_password, password)
     except (VerificationError, VerifyMismatchError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid authorization credentials",
         )
     return user_data
