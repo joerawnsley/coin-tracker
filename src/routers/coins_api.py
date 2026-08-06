@@ -1,12 +1,17 @@
-from fastapi import APIRouter, Cookie, Header, HTTPException, status, Depends
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, RedirectResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from src.database_models import Coin, Duty
-from src.input_models import NewCoin, NewDuty, DutyUpdate
-from src.utils import coin_to_dict, duty_to_dict
-from src.auth import user_db, get_user_from_token, authenticate_api_call
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import (
+    JSONResponse,
+    PlainTextResponse,
+    )
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from peewee import IntegrityError
+
+from src.auth import authenticate_api_call, get_user_from_token
+from src.database_models import Coin, Duty
+from src.input_models import DutyUpdate, NewCoin, NewDuty
+from src.utils import coin_to_dict, duty_to_dict
 
 router = APIRouter()
 security = HTTPBasic()
@@ -34,7 +39,8 @@ def list_coins():
 @router.post("/api/coins", status_code=201, response_class=JSONResponse)
 def add_coin(
         coin: NewCoin, 
-        access_token: str | None = None, 
+        access_token: str | None = None,
+        # get the credentials from the HTTPBasic auth header if access_token is not provided
         credentials: Annotated[HTTPBasicCredentials | None, Depends(security)] = None
         ):
     if access_token:
@@ -45,7 +51,7 @@ def add_coin(
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
+                detail="Invalid credentials or authorization",
             )
         
     Coin.create(
@@ -79,7 +85,7 @@ def delete_coin(coin_path,
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
+                detail="Invalid credentials or authorization",
             )  
     
     try:
@@ -103,7 +109,7 @@ def add_duties_to_coin(
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
+                detail="Invalid credentials or authorization",
             )
         
     selected_coin = Coin.get(Coin.coin_path == coin_path)
@@ -126,7 +132,7 @@ def remove_duties_from_coin(
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
+                detail="Invalid credentials or authorization",
             )  
         
     selected_coin = Coin.get(Coin.coin_path == coin_path)
@@ -203,7 +209,7 @@ def add_duty(
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
+                detail="Invalid credentials or authorization",
             )  
         
     Duty.create(
@@ -228,7 +234,7 @@ def update_duty_description(
     if user.role != "admin":
         raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication credentials",
+                detail="Invalid credentials or authorization",
             )
     
     selected_duty = Duty.get(Duty.duty_number == duty_number)
