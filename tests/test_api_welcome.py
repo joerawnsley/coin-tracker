@@ -15,13 +15,13 @@ client = TestClient(app)
 # ----- welcome endpoint -----
 
 
-def test_home_route_returns_message():
+def test_home_route_returns_message(empty_database):
     response = client.get("/api")
     assert response.status_code == 200
     assert "Welcome" in response.text
 
 
-def test_home_route_returns_json_object():
+def test_home_route_returns_json_object(empty_database):
     response = client.get("/api")
     data = response.json()
     assert isinstance(data, dict)
