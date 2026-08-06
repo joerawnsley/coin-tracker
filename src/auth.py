@@ -14,6 +14,7 @@ def get_user_dict_from_db():
             "username": user.username,
             "role": user.role,
             "hashed_password": user.hashed_password,
+            "uuid": user.id,
         }
     return user_dictionary
 
