@@ -1,12 +1,12 @@
 {
-  "family": "jbr-coins-api",
+  "family": "jbr-coin-tracker",
   "executionRoleArn": "arn:aws:iam::261219435789:role/ecs-role-jbr",
   "taskRoleArn": "arn:aws:iam::261219435789:role/ecs-role-jbr",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "coins-api-server",
-      "image": "jbr-coins-api:latest",
+      "name": "coin-tracker-server",
+      "image": "jbr-coin-tracker:latest",
       "portMappings": [
         {
           "containerPort": 8000,

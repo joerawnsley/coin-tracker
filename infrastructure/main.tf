@@ -4,7 +4,7 @@ provider "aws" {
 
 # AWS ECR REPOSITORY
 resource "aws_ecr_repository" "app_repo" {
-  name                 = "jbr-coins-api"
+  name                 = "jbr-coin-tracker"
   image_tag_mutability = "MUTABLE"
   force_delete = true
 
@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:joerawnsley/coins_api:*"]
+      values   = ["repo:joerawnsley/coin_tracker:*"]
     }
   }
 }
@@ -170,7 +170,7 @@ resource "aws_ecs_cluster" "main" {
 
 # task definition
 resource "aws_ecs_task_definition" "app" {
-  family                   = "jbr-coins-api"
+  family                   = "jbr-coin-tracker"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -179,7 +179,7 @@ resource "aws_ecs_task_definition" "app" {
   task_role_arn            = aws_iam_role.ecs_role.arn
 
   container_definitions = jsonencode([{
-    name      = "coins-api-server"
+    name      = "coin-tracker-server"
     image     = "python:3.11-slim" 
     command   = ["python", "-m", "http.server", "8000"] 
     essential = true

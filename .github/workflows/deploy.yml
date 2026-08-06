@@ -53,23 +53,17 @@ jobs:
           - name: Build, tag, and push docker image to Amazon ECR
             id: build-image
             run: |
-               docker build -t jbr-coins-api .
-               docker tag jbr-coins-api:latest 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coins-api:latest
-               docker push 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coins-api:latest
+               docker build -t jbr-coin-tracker .
+               docker tag jbr-coin-tracker:latest 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coin-tracker:latest
+               docker push 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coin-tracker:latest
           
           - name: Render Amazon ECS task definition
             id: task-def
             uses: aws-actions/amazon-ecs-render-task-definition@v1
             with:
               task-definition: .github/workflows/ecs_task.json
-              container-name: coins-api-server
-              image: 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coins-api:latest
-              # environment-variables: |
-              #   DB_LOCATION=remote
-              #   REMOTE_SCHEMA=prod
-              #   DB_LOGGING=off
-              #   DB_HOST=${{ secrets.DB_HOST }}
-              #   DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+              container-name: coin-tracker-server
+              image: 261219435789.dkr.ecr.eu-west-2.amazonaws.com/jbr-coin-tracker:latest
               environment-variables: |
                 DB_ENVIRONMENT=prod
                 DB_LOGGING=off
