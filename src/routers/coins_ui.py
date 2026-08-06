@@ -138,7 +138,6 @@ def edit_coin_page(
 
 @router.post("/edit-coin/{coin_path}")
 def edit_coin_submit(
-    request: Request,
     coin_path: str,
     duties: Annotated[list[int], Form()] = [],  # noqa: B006
     completed: Annotated[bool, Form()] = False,
