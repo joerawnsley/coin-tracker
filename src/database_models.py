@@ -1,6 +1,10 @@
+import os
+import uuid
+
+import dotenv
 from peewee import *
+
 from src.database import db
-import os, dotenv, uuid
 
 dotenv.load_dotenv()
 
