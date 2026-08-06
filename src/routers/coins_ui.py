@@ -1,5 +1,7 @@
+import os
 from typing import Annotated
 
+import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import APIRouter, Cookie, Form, HTTPException, Request, status
@@ -249,12 +251,12 @@ def login(username: str = Form(...), password: str = Form(...)):
 
 
     response = RedirectResponse(url="/coins", status_code=status.HTTP_303_SEE_OTHER)
-    # add logic here to generate a JWT token #JWT
-
+    #JWT change secret to something stored in .env file and not hardcoded 
+    encoded_jwt = jwt.encode({"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256")
     response.set_cookie(
         key="access_token",
-        # this is where we will pass in the JWT token. #JWT
-        value=f"Bearer {user_data.username}",
+        # this is where we pass in the JWT token. #JWT
+        value=encoded_jwt,
         httponly=True,
         max_age=1800,
     )
