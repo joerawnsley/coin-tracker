@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Joe's Coins - User Requests{% endblock %}
+
+{% block content %}
+
+<div class="container">
+        <div class="header">
+            <h1>User Requests</h1>
+        </div>
+        <p>Showing last 100 user requests.</p>
+        <div class="card">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Method</th>
+                            <th>Endpoint</th>
+                            <th>Status</th>
+                            <th>Body</th>
+                            <th>Request ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in user_requests %}
+                        <tr>
+                            <!-- Timestamp -->
+                            <td>
+                                {{ req.timestamp.strftime('%Y-%m-%d %H:%M:%S') if req.timestamp else 'N/A' }}
+                            </td>
+                            
+                            <!-- Username -->
+                            <td>
+                                <strong>{{ req.username or 'Anonymous' }}</strong>
+                            </td>
+                            
+                            <!-- Method Badge -->
+                            <td>
+                                {% set method_class = 'method-' ~ req.method.lower() if req.method else '' %}
+                                <span class="badge {{ method_class }}">
+                                    {{ req.method or 'N/A' }}
+                                </span>
+                            </td>
+                            
+                            <!-- Endpoint -->
+                            <td>
+                                <code>{{ req.endpoint }}</code>
+                            </td>
+                            
+                            <!-- Status Code Badge -->
+                            <td>
+                                {% set status_str = req.status | string %}
+                                {% set status_class = 
+                                    'status-2xx' if status_str.startswith('2') else 
+                                    'status-4xx' if status_str.startswith('4') else 
+                                    'status-5xx' if status_str.startswith('5') else 
+                                    'status-unknown' 
+                                %}
+                                <span class="badge {{ status_class }}">
+                                    {{ req.status }}
+                                </span>
+                            </td>
+                            
+                            <!-- Body -->
+                            <td>
+                                {% if req.body %}
+                                    <div class="body-cell" title="{{ req.body }}">
+                                        {{ req.body }}
+                                    </div>
+                                {% else %}
+                                    <span style="color: #cbd5e1;">None</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Request UUID -->
+                            <td>
+                                <small style="color: #94a3b8; font-family: monospace;">
+                                    {{ req.id }}
+                                </small>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                No user requests logged yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

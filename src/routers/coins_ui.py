@@ -12,6 +12,7 @@ from src.auth import (
     get_user_from_token,
     get_user_from_username,
 )
+from src.database_models import UserRequest
 from src.input_models import NewCoin
 from src.routers import coins_api
 
@@ -26,21 +27,30 @@ ph = PasswordHasher()
 
 @router.get("/", response_class=HTMLResponse)
 def welcome_page(
-    request: Request, access_token: Annotated[str | None, Cookie()] = None
+    request: Request,
+    access_token: Annotated[str | None, Cookie()] = None,
+    error: str | None = None,
 ):
     try:
-        username = get_user_from_token(access_token).username
+        user = get_user_from_token(access_token)
     except HTTPException:
-        username = None
+        user = None
 
-    subpages = [
-        {"title": "All Coins", "endpoint": "coins_list_page"},
-        {"title": "All Duties", "endpoint": "duties_list_page"},
-    ]
+    if user and user.role == "admin":
+        subpages = [
+            {"title": "All Coins", "endpoint": "coins_list_page"},
+            {"title": "All Duties", "endpoint": "duties_list_page"},
+            {"title": "User Requests", "endpoint": "user_requests_page"},
+        ]
+    else:
+        subpages = [
+            {"title": "All Coins", "endpoint": "coins_list_page"},
+            {"title": "All Duties", "endpoint": "duties_list_page"},
+        ]
     return templates.TemplateResponse(
         request=request,
         name="welcome.html",
-        context={"subpages": subpages, "username": username},
+        context={"subpages": subpages, "username": user.username if user else None, "error": error},
     )
 
 
@@ -219,7 +229,7 @@ def delete_coin_submit(
 
 @router.get("/login", response_class=HTMLResponse)
 # probably don't need to pass in the access_token here, but leaving it in for now
-#refactor
+# refactor
 def login_page(
     request: Request,
     access_token: Annotated[str | None, Cookie()] = None,
@@ -228,7 +238,12 @@ def login_page(
     return templates.TemplateResponse(
         request=request,
         name="login.html",
-        context={"username": get_user_from_token(access_token).username if access_token else None, "error": error},
+        context={
+            "username": get_user_from_token(access_token).username
+            if access_token
+            else None,
+            "error": error,
+        },
     )
 
 
@@ -248,9 +263,10 @@ def login(username: str = Form(...), password: str = Form(...)):
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-
-    response = RedirectResponse(url="/coins", status_code=status.HTTP_303_SEE_OTHER)
-    encoded_jwt = jwt.encode({"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256")
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+    encoded_jwt = jwt.encode(
+        {"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256"
+    )
     response.set_cookie(
         key="access_token",
         value=encoded_jwt,
@@ -266,3 +282,33 @@ def logout():
     response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("access_token")
     return response
+
+
+# =====================================================================================
+#                    - - - - - - - - - - USER REQUESTS - - - - - - - - -
+# =====================================================================================
+
+
+@router.get("/user-requests", response_class=HTMLResponse)
+def user_requests_page(
+    request: Request,
+    access_token: Annotated[str | None, Cookie()] = None,
+):
+    try:
+        user = get_user_from_token(access_token)
+        if user.role != "admin":
+            return RedirectResponse(
+                url="/?error=unauthorised", status_code=status.HTTP_303_SEE_OTHER
+            )
+        user_requests = list(
+            UserRequest.select().order_by(UserRequest.timestamp.desc()).limit(100)
+        )
+        return templates.TemplateResponse(
+            request=request,
+            name="user-requests.html",
+            context={"user_requests": user_requests, "username": user.username},
+        )
+    except HTTPException:
+        return RedirectResponse(
+            url="/?error=unauthorised", status_code=status.HTTP_303_SEE_OTHER
+        )
