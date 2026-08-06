@@ -22,6 +22,8 @@ user_db = get_user_dict_from_db
 
 
 def get_user_from_username(username: str):
+    # probably not the most efficient way to do this, but it works for now
+    #refactor
     all_user_dict = user_db()
     if username in all_user_dict:
         user_dict = all_user_dict[username]
@@ -30,11 +32,17 @@ def get_user_from_username(username: str):
 
 def decode_token(token: str):
     # not yet secure
+    # placeholder for JWT base64 decoding logic
+    #JWT
+    # maybe don't need this function at all, just put all the logic in get_user_from_token
     user = get_user_from_username(token)
     return user
 
 
 def get_user_from_token(access_token):
+    #JWT
+    # reads the access_token cookie and returns the user object if valid, otherwise raises an HTTPException
+    # add logic here to decode the JWT token, check the signature and extract the username
     if not access_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
