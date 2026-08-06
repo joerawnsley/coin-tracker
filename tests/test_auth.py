@@ -28,7 +28,9 @@ def test_get_user_returns_correct_data(full_database):
 
 def test_get_user_from_token(full_database):
     username = "joe"
-    encoded_jwt = jwt.encode({"sub": username}, os.getenv("JWT_SECRET"), algorithm="HS256")
+    encoded_jwt = jwt.encode(
+        {"sub": username}, os.getenv("JWT_SECRET"), algorithm="HS256"
+    )
     user = get_user_from_token(encoded_jwt)
     assert user.username == "joe"
     assert user.role == "user"
@@ -36,7 +38,9 @@ def test_get_user_from_token(full_database):
 
 def test_get_current_user_not_exists(full_database):
     username = "alice"
-    encoded_jwt = jwt.encode({"sub": username}, os.getenv("JWT_SECRET"), algorithm="HS256")
+    encoded_jwt = jwt.encode(
+        {"sub": username}, os.getenv("JWT_SECRET"), algorithm="HS256"
+    )
 
     with pytest.raises(HTTPException):
         get_user_from_token(encoded_jwt)
@@ -50,7 +54,7 @@ def test_login_converts_form_submission_to_token(full_database):
     set_cookie_header = response.headers.get("set-cookie")
     cookie = SimpleCookie()
     cookie.load(set_cookie_header)
-    token = cookie["access_token"].value  
+    token = cookie["access_token"].value
 
     response_cookie_header = jwt.decode(
         token,

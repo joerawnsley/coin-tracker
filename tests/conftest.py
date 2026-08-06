@@ -35,10 +35,11 @@ hashed_users = [
     {
         "username": user["username"],
         "role": user["role"],
-        "hashed_password": ph.hash(user["plaintext_password"])
+        "hashed_password": ph.hash(user["plaintext_password"]),
     }
     for user in all_users
 ]
+
 
 # --------------- test fixtures -----------------
 @pytest.fixture()
