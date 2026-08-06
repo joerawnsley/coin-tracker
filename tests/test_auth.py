@@ -21,6 +21,8 @@ def test_get_user_returns_correct_data(full_database):
 
 
 def test_get_user_from_token(mocker):
+    # don't think this is testing anything useful, but leaving it in for now
+    #refactor
     mocker.patch(
         "src.auth.decode_token",
         return_value=User(
