@@ -217,6 +217,8 @@ def delete_coin_submit(
 
 
 @router.get("/login", response_class=HTMLResponse)
+# probably don't need to pass in the access_token here, but leaving it in for now
+#refactor
 def login_page(
     request: Request,
     access_token: Annotated[str | None, Cookie()] = None,
@@ -247,9 +249,11 @@ def login(username: str = Form(...), password: str = Form(...)):
 
 
     response = RedirectResponse(url="/coins", status_code=status.HTTP_303_SEE_OTHER)
+    # add logic here to generate a JWT token #JWT
 
     response.set_cookie(
         key="access_token",
+        # this is where we will pass in the JWT token. #JWT
         value=f"Bearer {user_data.username}",
         httponly=True,
         max_age=1800,
