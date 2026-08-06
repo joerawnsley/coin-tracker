@@ -76,6 +76,7 @@ jobs:
                 DB_LOGGING=off
                 DB_HOST=${{ secrets.DB_HOST }}
                 DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+                JWT_SECRET=${{ secrets.JWT_SECRET }}
 
           - name: Deploy to Amazon ECS service
             uses: aws-actions/amazon-ecs-deploy-task-definition@v2
