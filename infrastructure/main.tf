@@ -77,11 +77,6 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# resource "aws_iam_role_policy_attachment" "ssm_full_access" {
-#   role       = aws_iam_role.ecs_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
-# }
-
 # outputs
 output "ecr_repository_url" {
   value       = aws_ecr_repository.app_repo.repository_url
