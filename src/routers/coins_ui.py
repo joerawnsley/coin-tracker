@@ -4,10 +4,9 @@ from typing import Annotated
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
-from fastapi import APIRouter, Cookie, Form, HTTPException, Request, Response, status
+from fastapi import APIRouter, Cookie, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from slowapi.errors import RateLimitExceeded
 
 from src.auth import (
     get_user_from_token,
