@@ -4,7 +4,7 @@ from typing import Annotated
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, VerifyMismatchError
-from fastapi import APIRouter, Cookie, Form, HTTPException, Request, status
+from fastapi import APIRouter, Cookie, Form, HTTPException, Request, Response, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from slowapi.errors import RateLimitExceeded
@@ -255,40 +255,33 @@ def login_page(
 @router.post("/login")
 @limiter.limit("3/minute")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
-    try:
-        user_data = get_user_from_username(username)
-        if not user_data:
-            return RedirectResponse(
-                url="/login?error=Invalid credentials",
-                status_code=status.HTTP_303_SEE_OTHER,
-            )
-        try:
-            ph.verify(user_data.hashed_password, password)
-        except (VerificationError, VerifyMismatchError):
-            return RedirectResponse(
-                url="/login?error=Invalid credentials",
-                status_code=status.HTTP_303_SEE_OTHER,
-            )
-
-        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
-        encoded_jwt = jwt.encode(
-            {"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256"
-        )
-        response.set_cookie(
-            key="access_token",
-            value=encoded_jwt,
-            httponly=True,
-            max_age=1800,
-        )
-
-        return response
-
-    except RateLimitExceeded:
-        
+    user_data = get_user_from_username(username)
+    if not user_data:
         return RedirectResponse(
-            url="/login?error=Too many login attempts. Please try again later.",
+            url="/login?error=Invalid credentials",
             status_code=status.HTTP_303_SEE_OTHER,
         )
+    try:
+        ph.verify(user_data.hashed_password, password)
+    except (VerificationError, VerifyMismatchError):
+        return RedirectResponse(
+            url="/login?error=Invalid credentials",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    encoded_jwt = jwt.encode(
+        {"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256"
+    )
+
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
+    response.set_cookie(
+        key="access_token",
+        value=encoded_jwt,
+        httponly=True,
+        max_age=1800,
+    )
+    return response
 
 
 @router.get("/logout")
