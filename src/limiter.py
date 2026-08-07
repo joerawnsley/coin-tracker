@@ -5,7 +5,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 limiter = Limiter(
-    key_func=get_remote_address, default_limits=["10/10 seconds", "20/minute"]
+    key_func=get_remote_address, default_limits=["7/10 seconds", "20/minute"]
 )
 
 templates = Jinja2Templates(directory="src/templates")
