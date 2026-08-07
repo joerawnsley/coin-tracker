@@ -6,12 +6,15 @@ import jwt
 import pytest
 from argon2 import PasswordHasher
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
+from src.app import app
 from src.auth import get_user_from_token, get_user_from_username
 from src.database_models import User
 from src.routers.coins_ui import login
 
 ph = PasswordHasher()
+client = TestClient(app)
 
 
 def test_get_user_returns_correct_type(full_database):
@@ -47,14 +50,20 @@ def test_get_current_user_not_exists(full_database):
         assert exc_info.value.status_code == 401
         assert exc_info.value.detail == "not authorized"
 
-
 def test_login_converts_form_submission_to_token(full_database):
-    response = login(username="joe", password="secret")
 
-    set_cookie_header = response.headers.get("set-cookie")
-    cookie = SimpleCookie()
-    cookie.load(set_cookie_header)
-    token = cookie["access_token"].value
+    # response = login(username="joe", password="secret")
+    response = client.post(
+        "/login",
+        data={"username": "joe", "password": "secret"},
+    )
+    print(dict(response.cookies))
+    token = response.cookies.get("access_token")
+    # set_cookie_header = response.headers.get("set-cookie")
+    # print(set_cookie_header)
+    # cookie = SimpleCookie()
+    # cookie.load(set_cookie_header)
+    # token = cookie["access_token"].value
 
     response_cookie_header = jwt.decode(
         token,
