@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       # values   = ["repo:joerawnsley/coin-tracker:ref:refs/heads/main"]
-      values   = ["repo:joerawnsley/coin-tracker:*"]
+      values   = ["repo:joerawnsley@240704355/coin-tracker@1259460861:*"]
     }
   }
 }
