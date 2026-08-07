@@ -33,10 +33,8 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      # values   = ["repo:joerawnsley/coin-tracker:*"]
       # values   = ["repo:joerawnsley/coin-tracker:ref:refs/heads/main"]
-      values   = ["*"]
-      # needs to be put back to something more restrictive once the deployment bug has been fixed. Trying to identify why the deployment is failing with "not authorized to assmue role" error.
+      values   = ["repo:joerawnsley/coin-tracker:*"]
     }
   }
 }
