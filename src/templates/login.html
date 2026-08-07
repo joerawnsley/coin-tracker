@@ -28,9 +28,14 @@
         >
   </div>
   <div class="error-message">
-    {% if error %}
+    {% if error == "Invalid credentials" or error == "unauthorised" %}
         <p>Incorrect username or password</p>
     {% endif %}
+
+    {% if error == "Too many login attempts" %}
+        <p>Too many login attempts. Please try again after one minute.</p>
+    {% endif %}
+
   </div>
 
   <div class="form-actions">

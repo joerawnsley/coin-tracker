@@ -7,6 +7,7 @@ from argon2.exceptions import VerificationError, VerifyMismatchError
 from fastapi import APIRouter, Cookie, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from slowapi.errors import RateLimitExceeded
 
 from src.auth import (
     get_user_from_token,
@@ -14,6 +15,7 @@ from src.auth import (
 )
 from src.database_models import UserRequest
 from src.input_models import NewCoin
+from src.limiter import limiter
 from src.routers import coins_api
 
 router = APIRouter()
@@ -50,7 +52,11 @@ def welcome_page(
     return templates.TemplateResponse(
         request=request,
         name="welcome.html",
-        context={"subpages": subpages, "username": user.username if user else None, "error": error},
+        context={
+            "subpages": subpages,
+            "username": user.username if user else None,
+            "error": error,
+        },
     )
 
 
@@ -246,35 +252,43 @@ def login_page(
         },
     )
 
-
 @router.post("/login")
-def login(username: str = Form(...), password: str = Form(...)):
-    user_data = get_user_from_username(username)
-    if not user_data:
-        return RedirectResponse(
-            url="/login?error=Invalid credentials",
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
+@limiter.limit("3/minute")
+def login(request: Request, username: str = Form(...), password: str = Form(...)):
     try:
-        ph.verify(user_data.hashed_password, password)
-    except (VerificationError, VerifyMismatchError):
-        return RedirectResponse(
-            url="/login?error=Invalid credentials",
-            status_code=status.HTTP_303_SEE_OTHER,
+        user_data = get_user_from_username(username)
+        if not user_data:
+            return RedirectResponse(
+                url="/login?error=Invalid credentials",
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+        try:
+            ph.verify(user_data.hashed_password, password)
+        except (VerificationError, VerifyMismatchError):
+            return RedirectResponse(
+                url="/login?error=Invalid credentials",
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+
+        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        encoded_jwt = jwt.encode(
+            {"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256"
+        )
+        response.set_cookie(
+            key="access_token",
+            value=encoded_jwt,
+            httponly=True,
+            max_age=1800,
         )
 
-    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
-    encoded_jwt = jwt.encode(
-        {"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256"
-    )
-    response.set_cookie(
-        key="access_token",
-        value=encoded_jwt,
-        httponly=True,
-        max_age=1800,
-    )
+        return response
 
-    return response
+    except RateLimitExceeded:
+        
+        return RedirectResponse(
+            url="/login?error=Too many login attempts. Please try again later.",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
 
 @router.get("/logout")
