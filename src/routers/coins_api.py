@@ -9,29 +9,21 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from peewee import IntegrityError
 
 from src.auth import authenticate_api_call, get_user_from_token
-from src.database_models import Coin, Duty, UserRequest
+from src.database_models import Coin, Duty
 from src.input_models import DutyUpdate, NewCoin, NewDuty
-from src.utils import coin_to_dict, duty_to_dict
+from src.utils import coin_to_dict, duty_to_dict, log_request
 
 router = APIRouter()
 security = HTTPBasic()
 
-def log_request(username: str, method: str, endpoint: str, body: str, status: str = "unknown"):
 
-    UserRequest.create(
-        username=username,
-        method=method,
-        endpoint=endpoint,
-        body=body,
-        status=status
-    )
 
 # ------------------------------------------------------------------------------------------ 
 # ------------------------------ welcome route -----------------------------------------------
 # ------------------------------------------------------------------------------------------ 
 @router.get("/api", response_class=JSONResponse)
 def root():
-    log_request(username="anonymous", method="GET", endpoint="/api", body="", status="success")
+    log_request(username="n/a", method="GET", endpoint="/api", body="", status="success")
     return {"message": "Welcome to the Coins API"}
 # ------------------------------------------------------------------------------------------ 
 # ------------------------------ coin routes -----------------------------------------------
@@ -43,7 +35,7 @@ def list_coins():
     coin_list = []
     for coin in query:
         coin_list.append(coin_to_dict(coin))
-    log_request(username="anonymous", method="GET", endpoint="/api/coins", body="", status="success")
+    log_request(username="n/a", method="GET", endpoint="/api/coins", body="", status="success")
     return coin_list
 
 @router.post("/api/coins", status_code=201, response_class=JSONResponse)
@@ -82,7 +74,7 @@ def add_coin(
 @router.get("/api/coins/{coin_path}", response_class=JSONResponse)
 def single_coin(coin_path):
     selected_coin = Coin.get(Coin.coin_path == coin_path)
-    log_request(username="anonymous", method="GET", endpoint=f"/api/coins/{coin_path}", body="", status="success")
+    log_request(username="n/a", method="GET", endpoint=f"/api/coins/{coin_path}", body="", status="success")
     return coin_to_dict(selected_coin)
 
 @router.delete("/api/coins/{coin_path}")
@@ -200,7 +192,7 @@ def list_coin_duties(coin_path):
     duties_list = []
     for duty in selected_coin.duties:
         duties_list.append(duty_to_dict(duty))
-    log_request(username="anonymous", method="GET", endpoint=f"/api/coins/{coin_path}/list-duties", body="", status="success")
+    log_request(username="n/a", method="GET", endpoint=f"/api/coins/{coin_path}/list-duties", body="", status="success")
     return duties_list
 
 # ------------------------------------------------------------------------------------------ 
@@ -213,13 +205,13 @@ def list_duties():
     duty_list = []
     for duty in query:
         duty_list.append(duty_to_dict(duty))
-    log_request(username="anonymous", method="GET", endpoint="/api/duties", body="", status="success")
+    log_request(username="n/a", method="GET", endpoint="/api/duties", body="", status="success")
     return duty_list
 
 @router.get("/api/duties/{duty_number}", response_class=JSONResponse)
 def single_duty(duty_number):
     selected_duty = Duty.get(Duty.duty_number == duty_number)
-    log_request(username="anonymous", method="GET", endpoint=f"/api/duties/{duty_number}", body="", status="success")
+    log_request(username="n/a", method="GET", endpoint=f"/api/duties/{duty_number}", body="", status="success")
     return duty_to_dict(selected_duty)
 
 @router.post("/api/duties", status_code=201, response_class=JSONResponse)
