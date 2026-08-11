@@ -112,7 +112,7 @@ def test_special_characters_not_allowed_in_coin_name(empty_database):
     assert response.status_code == 422
     assert Coin.select().where(Coin.coin_path == "deeper").first() is None
 
-def test_double_space_not_allowed_in_coin_name(empty_database):
+def test_double_space_in_coin_name_converted_to_single(empty_database):
 
     coin_data = {
         "coin_name": "Going  Deeper",
@@ -120,8 +120,11 @@ def test_double_space_not_allowed_in_coin_name(empty_database):
     }
     response = client.post("/api/coins", json=coin_data, headers=admin_headers)
 
-    assert response.status_code == 422
-    assert Coin.select().where(Coin.coin_path == "deeper").first() is None
+    print(Coin.select().where(Coin.coin_path == "deeper").first().coin_name)
+    assert response.status_code == 201
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
+    assert Coin.select().where(Coin.coin_path == "deeper").first().coin_name == "Going Deeper"
+
 
 
 def test_add_coin_with_duties_user(db_with_duties_but_no_coins):

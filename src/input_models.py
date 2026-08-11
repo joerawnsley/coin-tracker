@@ -26,9 +26,7 @@ class NewCoin(BaseModel):
         if not re.match(name_pattern, self.coin_name):
             raise ValueError('coin name must not contain special characters')
         if re.search(r" {2,}", self.coin_name):
-            print(self.coin_name, "matches second regex")
-            raise ValueError('coin name must not contain double space characters')
-        # self.coin_name = re.replace(r" +", " ", self.coin_name)
+            self.coin_name = re.sub(r" {2,}", " ", self.coin_name)
         return self
 
 
