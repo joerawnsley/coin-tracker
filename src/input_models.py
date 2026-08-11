@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 ''' 
 to do: 
 - allow spaces in coin_name
+- trim spaces and compress double spaces
 - change error message
 - handle 422 error in the frontend
 - test and build out validation on other input models
@@ -25,8 +26,8 @@ class NewCoin(BaseModel):
     def verify_coin_name(self) -> Self:
         if not re.match(name_pattern, self.coin_name):
             raise ValueError('coin name must not contain special characters')
-        if re.search(r" {2,}", self.coin_name):
-            self.coin_name = re.sub(r" {2,}", " ", self.coin_name)
+        self.coin_name = re.sub(r" {2,}", " ", self.coin_name).strip()
+
         return self
 
 

@@ -125,6 +125,19 @@ def test_double_space_in_coin_name_converted_to_single(empty_database):
     assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
     assert Coin.select().where(Coin.coin_path == "deeper").first().coin_name == "Going Deeper"
 
+def test_spaces_trimmed_from_coin_name_start_and_end(empty_database):
+
+    coin_data = {
+        "coin_name": " Going Deeper ",
+        "coin_path": "deeper",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    print(Coin.select().where(Coin.coin_path == "deeper").first().coin_name)
+    assert response.status_code == 201
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
+    assert Coin.select().where(Coin.coin_path == "deeper").first().coin_name == "Going Deeper"
+
 
 
 def test_add_coin_with_duties_user(db_with_duties_but_no_coins):
