@@ -101,6 +101,17 @@ def test_add_coin_with_no_duties_to_empty_db(empty_database):
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
 
+def test_special_characters_not_allowed_in_coin_name(empty_database):
+
+    coin_data = {
+        "coin_name": "G*ing D^^per",
+        "coin_path": "deeper",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    assert response.status_code == 422
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is None
+
 
 def test_add_coin_with_duties_user(db_with_duties_but_no_coins):
 
