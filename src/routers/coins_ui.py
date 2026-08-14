@@ -40,8 +40,8 @@ def welcome_page(
 
     if user and user.role == "admin":
         subpages = [
-            {"title": "All Coins", "endpoint": "coins_list_page"},
-            {"title": "All Duties", "endpoint": "duties_list_page"},
+            {"title": "Coins", "endpoint": "coins_list_page"},
+            {"title": "Duties", "endpoint": "duties_list_page"},
             {"title": "User Requests", "endpoint": "user_requests_page"},
         ]
     else:
