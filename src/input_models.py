@@ -1,35 +1,45 @@
 import re
-from typing import Self
+from typing import Annotated
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field
 
 # #validation for the input data models
 ''' 
 to do: 
-- allow spaces in coin_name
-- trim spaces and compress double spaces
-- change error message
+- check error messages
 - handle 422 error in the frontend
 - test and build out validation on other input models
 '''
+# allow only alphanumeric characters and spaces in coin_name
 name_pattern = r"^[a-zA-Z0-9 ]+$"
+path_pattern = r"^[a-zA-Z0-9\-]+$"
+
+def no_special_characters(value: str) -> str:
+        if not re.match(name_pattern, value):
+            raise ValueError('must not contain special characters')
+
+        # replace multiple spaces with a single space and strip leading/trailing spaces
+        return re.sub(r" {2,}", " ", value).strip()
+
+def alphanumeric_and_hyphens_only(value: str) -> str:
+        if not re.match(path_pattern, value):
+            raise ValueError('letters, numbers and hyphens only')
+
+        return value.lower()
 
 class NewCoin(BaseModel):
-    coin_name: str = Field(
-        min_length=1, 
-        max_length=50)
-    coin_path: str
+    coin_name: Annotated[
+        str, 
+        Field(min_length=1, max_length=50), 
+        BeforeValidator(no_special_characters)
+        ]
+    coin_path: Annotated[
+        str,
+        Field(min_length=1, max_length=100),
+        BeforeValidator(alphanumeric_and_hyphens_only)
+    ]
     duties: list[int] | None = None
     is_complete: bool | None = None
-
-    @model_validator(mode='after')
-    def verify_coin_name(self) -> Self:
-        if not re.match(name_pattern, self.coin_name):
-            raise ValueError('coin name must not contain special characters')
-        self.coin_name = re.sub(r" {2,}", " ", self.coin_name).strip()
-
-        return self
-
 
 
 class NewDuty(BaseModel):
