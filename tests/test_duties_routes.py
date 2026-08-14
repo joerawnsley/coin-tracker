@@ -84,13 +84,13 @@ def test_duty_description_can_contain_basic_punctuation(empty_database):
 
 def test_duty_description_cannot_contain_other_punctuation(empty_database):
     assert Duty.select().count() == 0
-    client.post(
+    response = client.post(
         "/api/duties",
         json={"duty_number": 1, "description": "Script & code"},
         headers=admin_headers,
     )
+    assert response.status_code == 422
     assert Duty.select().count() == 0
-    assert Duty.get(Duty.duty_number == 1) == None
 
 #  ----------------------------------------------------------------------------------------end validation tests------------------------------------
 

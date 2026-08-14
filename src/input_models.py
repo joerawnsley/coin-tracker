@@ -13,6 +13,7 @@ to do:
 # allow only alphanumeric characters and spaces in coin_name
 name_pattern = r"^[a-zA-Z0-9 ]+$"
 path_pattern = r"^[a-zA-Z0-9\-]+$"
+description_pattern = r"^[A-Za-z0-9\s.,!?\'\"\-\/\(\)]+$"
 
 def no_special_characters(value: str) -> str:
         if not re.match(name_pattern, value):
@@ -26,6 +27,12 @@ def alphanumeric_and_hyphens_only(value: str) -> str:
             raise ValueError('letters, numbers and hyphens only')
 
         return value.lower()
+
+def alphanumeric_and_basic_punctuation(value: str) -> str:
+        if not re.match(description_pattern, value):
+            raise ValueError('Only letters, numbers and basic punctuation (. , ! ? \' \" -) allowed')
+
+        return value
 
 class NewCoin(BaseModel):
     coin_name: Annotated[
@@ -44,9 +51,17 @@ class NewCoin(BaseModel):
 
 class NewDuty(BaseModel):
     duty_number: int
-    description: str
+    description: Annotated[
+        str,
+        Field(min_length=1, max_length=250),
+        BeforeValidator(alphanumeric_and_basic_punctuation)
+    ]
 
 
 class DutyUpdate(BaseModel):
     duty_number: int | None = None
-    description: str
+    description: Annotated[
+        str,
+        Field(min_length=1, max_length=250),
+        BeforeValidator(alphanumeric_and_basic_punctuation)
+    ]
