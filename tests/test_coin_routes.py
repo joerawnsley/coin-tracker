@@ -85,7 +85,7 @@ def test_list_duties_for_coin_admin(full_database):
     assert "automate any manual tasks" in response.text
 
 
-# -------- POST /coins --------
+# -------------------------------------------------- POST /coins -------------------
 
 
 def test_add_coin_with_no_duties_to_empty_db(empty_database):
@@ -101,6 +101,87 @@ def test_add_coin_with_no_duties_to_empty_db(empty_database):
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
 
+#  ----------------------------------------------------------------------------------------start validation tests------------------------------------
+def test_special_characters_not_allowed_in_coin_name(empty_database):
+
+    coin_data = {
+        "coin_name": "G*ing D^^per",
+        "coin_path": "deeper",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    assert response.status_code == 422
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is None
+
+def test_double_space_in_coin_name_converted_to_single(empty_database):
+
+    coin_data = {
+        "coin_name": "Going  Deeper",
+        "coin_path": "deeper",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    print(Coin.select().where(Coin.coin_path == "deeper").first().coin_name)
+    assert response.status_code == 201
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
+    assert Coin.select().where(Coin.coin_path == "deeper").first().coin_name == "Going Deeper"
+
+def test_spaces_trimmed_from_coin_name_start_and_end(empty_database):
+
+    coin_data = {
+        "coin_name": " Going Deeper ",
+        "coin_path": "deeper",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    print(Coin.select().where(Coin.coin_path == "deeper").first().coin_name)
+    assert response.status_code == 201
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
+    assert Coin.select().where(Coin.coin_path == "deeper").first().coin_name == "Going Deeper"
+
+
+def test_special_characters_not_allowed_in_coin_path(empty_database):
+
+    coin_data = {
+        "coin_name": "Going Deeper",
+        "coin_path": "deeper$",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    assert response.status_code == 422
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is None 
+
+
+def test_space_not_allowed_in_coin_path(empty_database):
+
+    coin_data = {
+        "coin_name": "Going Deeper",
+        "coin_path": "deeper path",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    assert response.status_code == 422
+    assert Coin.select().where(Coin.coin_path == "deeper").first() is None
+
+def test_hyphens_allowed_in_coin_path(empty_database):
+    coin_data = {
+        "coin_name": "Going Deeper",
+        "coin_path": "deeper-path",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+    assert response.status_code == 201
+    assert Coin.select().where(Coin.coin_path == "deeper-path").first().coin_path == "deeper-path"
+
+def test_uppercase_letters_converted_to_lower_in_coin_path(empty_database):
+    coin_data = {
+        "coin_name": "Going Deeper",
+        "coin_path": "DeeperPath",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+    assert response.status_code == 201
+    assert Coin.select().where(Coin.coin_path == "deeperpath").first() is not None
+
+#  ----------------------------------------------------------------------------------------end validation tests------------------------------------
 
 def test_add_coin_with_duties_user(db_with_duties_but_no_coins):
 

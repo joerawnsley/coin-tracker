@@ -1,17 +1,18 @@
 import os
-from http.cookies import SimpleCookie
 from sys import exc_info
 
 import jwt
 import pytest
 from argon2 import PasswordHasher
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
+from src.app import app
 from src.auth import get_user_from_token, get_user_from_username
 from src.database_models import User
-from src.routers.coins_ui import login
 
 ph = PasswordHasher()
+client = TestClient(app, follow_redirects=False)
 
 
 def test_get_user_returns_correct_type(full_database):
@@ -49,18 +50,19 @@ def test_get_current_user_not_exists(full_database):
 
 
 def test_login_converts_form_submission_to_token(full_database):
-    response = login(username="joe", password="secret")
 
-    set_cookie_header = response.headers.get("set-cookie")
-    cookie = SimpleCookie()
-    cookie.load(set_cookie_header)
-    token = cookie["access_token"].value
+    response = client.post(
+        "/login",
+        data={"username": "joe", "password": "secret"},
+    )
+    assert response.status_code == 303
+
+    token = response.cookies.get("access_token")
+    assert token is not None, "access_token cookie not set in response"
 
     response_cookie_header = jwt.decode(
         token,
         os.getenv("JWT_SECRET"),
         algorithms=["HS256"],
     )
-
-    assert response.status_code == 303
     assert response_cookie_header.get("sub") == "joe"

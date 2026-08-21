@@ -14,7 +14,9 @@ from src.auth import (
 )
 from src.database_models import UserRequest
 from src.input_models import NewCoin
+from src.limiter import limiter
 from src.routers import coins_api
+from src.utils import log_request
 
 router = APIRouter()
 templates = Jinja2Templates(directory="src/templates")
@@ -38,8 +40,8 @@ def welcome_page(
 
     if user and user.role == "admin":
         subpages = [
-            {"title": "All Coins", "endpoint": "coins_list_page"},
-            {"title": "All Duties", "endpoint": "duties_list_page"},
+            {"title": "Coins", "endpoint": "coins_list_page"},
+            {"title": "Duties", "endpoint": "duties_list_page"},
             {"title": "User Requests", "endpoint": "user_requests_page"},
         ]
     else:
@@ -47,10 +49,23 @@ def welcome_page(
             {"title": "All Coins", "endpoint": "coins_list_page"},
             {"title": "All Duties", "endpoint": "duties_list_page"},
         ]
+
+    log_request(
+        username=user.username if user else "anonymous",
+        method="GET",
+        endpoint="/",
+        body="",
+        status="success",
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="welcome.html",
-        context={"subpages": subpages, "username": user.username if user else None, "error": error},
+        context={
+            "subpages": subpages,
+            "username": user.username if user else None,
+            "error": error,
+        },
     )
 
 
@@ -71,6 +86,15 @@ def coins_list_page(
         username = None
 
     coins = coins_api.list_coins()
+
+    log_request(
+        username=username if username else "anonymous",
+        method="GET",
+        endpoint="/coins",
+        body="",
+        status="success",
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="coins.html",
@@ -88,6 +112,15 @@ def duties_list_page(
         username = None
 
     duties = coins_api.list_duties()
+
+    log_request(
+        username=username if username else "anonymous",
+        method="GET",
+        endpoint="/duties",
+        body="",
+        status="success",
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="duties.html",
@@ -107,6 +140,14 @@ def single_duty_page(
         username = None
 
     duties = [coins_api.single_duty(duty_number)]
+
+    log_request(
+        username=username if username else "anonymous",
+        method="GET",
+        endpoint=f"/duties/{duty_number}",
+        body="",
+        status="success",
+    )
     return templates.TemplateResponse(
         request=request,
         name="duties.html",
@@ -130,6 +171,15 @@ def edit_coin_page(
         user = get_user_from_token(access_token)
         selected_coin = coins_api.single_coin(coin_path)
         all_duties = coins_api.list_duties()
+
+        log_request(
+            username=user.username,
+            method="GET",
+            endpoint=f"/edit-coin/{coin_path}",
+            body="",
+            status="success",
+        )
+
         return templates.TemplateResponse(
             request=request,
             name="edit-coin.html",
@@ -141,6 +191,14 @@ def edit_coin_page(
             },
         )
     except HTTPException:
+        log_request(
+            username="unknown",
+            method="GET",
+            endpoint=f"/edit-coin/{coin_path}",
+            body="",
+            status="HTTPException: unauthorised",
+        )
+
         return RedirectResponse(
             url="/coins?error=unauthorised", status_code=status.HTTP_303_SEE_OTHER
         )
@@ -158,6 +216,8 @@ def edit_coin_submit(
     original_status = original_coin["isComplete"]
 
     role = get_user_from_token(access_token).role
+    username = get_user_from_token(access_token).username
+
     if role == "admin":
         coins_api.remove_duties_from_coin(coin_path, original_duties, access_token)
         coins_api.add_duties_to_coin(coin_path, duties, access_token)
@@ -166,6 +226,14 @@ def edit_coin_submit(
         coins_api.mark_coin_complete(coin_path, access_token)
     if original_status and not completed:
         coins_api.mark_coin_incomplete(coin_path, access_token)
+
+    log_request(
+        username=username,
+        method="POST",
+        endpoint=f"/edit-coin/{coin_path}",
+        body=f"original_duties={original_duties}, new_duties={duties}, original_status={original_status}, new_status={completed}",
+        status="success",
+    )   
 
     return RedirectResponse(
         url="/coins",
@@ -180,12 +248,29 @@ def create_coin_page(
     try:
         user = get_user_from_token(access_token)
         all_duties = coins_api.list_duties()
+
+        log_request(
+            username=user.username,
+            method="GET",
+            endpoint="/create-coin",
+            body="",
+            status="success",
+        )
+
         return templates.TemplateResponse(
             request=request,
             name="create-coin.html",
             context={"duties": all_duties, "username": user.username},
         )
+    
     except HTTPException:
+        log_request(
+            username=user.username if user else "unknown",
+            method="GET",
+            endpoint="/create-coin",
+            body="",
+            status="HTTPException: unauthorised",
+        )
         return RedirectResponse(
             url="/coins?error=unauthorised", status_code=status.HTTP_303_SEE_OTHER
         )
@@ -200,6 +285,15 @@ def create_coin_submit(
 ):
     new_coin = NewCoin(coin_name=coin_name, coin_path=coin_path, duties=duties)
     coins_api.add_coin(new_coin, access_token)
+
+    log_request(
+        username=get_user_from_token(access_token).username,
+        method="POST",
+        endpoint="/create-coin",
+        body=f"coin_path={coin_path}, coin_name={coin_name}, duties={duties}",
+        status="success",
+    )
+
     return RedirectResponse(
         url="/coins",
         status_code=status.HTTP_303_SEE_OTHER,
@@ -216,6 +310,14 @@ def delete_coin_submit(
 
     coins_api.delete_coin(coin_path, access_token)
 
+    log_request(
+        username=get_user_from_token(access_token).username,
+        method="POST",
+        endpoint=f"/delete-coin/{coin_path}",
+        body=f"coin_path={coin_path}, existing_duties={existing_duties}",
+        status="success",
+    )
+
     return RedirectResponse(
         url="/coins",
         status_code=status.HTTP_303_SEE_OTHER,
@@ -228,13 +330,20 @@ def delete_coin_submit(
 
 
 @router.get("/login", response_class=HTMLResponse)
-# probably don't need to pass in the access_token here, but leaving it in for now
-# refactor
 def login_page(
     request: Request,
     access_token: Annotated[str | None, Cookie()] = None,
     error: str | None = None,
 ):
+    log_request(
+        username=get_user_from_token(access_token).username
+        if access_token
+        else "anonymous",
+        method="GET",
+        endpoint="/login",
+        body="",
+        status="success",
+    )
     return templates.TemplateResponse(
         request=request,
         name="login.html",
@@ -248,9 +357,17 @@ def login_page(
 
 
 @router.post("/login")
-def login(username: str = Form(...), password: str = Form(...)):
+@limiter.limit("3/minute")
+def login(request: Request, username: str = Form(...), password: str = Form(...)):
     user_data = get_user_from_username(username)
     if not user_data:
+        log_request(
+            username="unregistered user",
+            method="POST",
+            endpoint="/login",
+            body=f"username={username}",
+            status="failure",
+        )
         return RedirectResponse(
             url="/login?error=Invalid credentials",
             status_code=status.HTTP_303_SEE_OTHER,
@@ -258,22 +375,37 @@ def login(username: str = Form(...), password: str = Form(...)):
     try:
         ph.verify(user_data.hashed_password, password)
     except (VerificationError, VerifyMismatchError):
+        log_request(
+            username=username,
+            method="POST",
+            endpoint="/login",
+            body=f"username={username}",
+            status="verification failure",
+        )
         return RedirectResponse(
             url="/login?error=Invalid credentials",
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     encoded_jwt = jwt.encode(
         {"sub": user_data.username}, os.getenv("JWT_SECRET"), algorithm="HS256"
     )
+
+    response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+
     response.set_cookie(
         key="access_token",
         value=encoded_jwt,
         httponly=True,
         max_age=1800,
     )
-
+    log_request(
+        username=username,
+        method="POST",
+        endpoint="/login",
+        body=f"username={username}",
+        status="success",
+    )
     return response
 
 
@@ -281,6 +413,13 @@ def login(username: str = Form(...), password: str = Form(...)):
 def logout():
     response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("access_token")
+    log_request(
+        username="anonymous",
+        method="GET",
+        endpoint="/logout",
+        body="",
+        status="success",
+    )
     return response
 
 

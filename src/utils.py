@@ -1,5 +1,7 @@
 import uuid
 
+from src.database_models import UserRequest
+
 
 def is_valid_uuid(val):
     try:
@@ -26,3 +28,13 @@ def duty_to_dict(duty):
         "description": duty.description,
         "coins": {coin.coin_name for coin in duty.coins},
     }
+
+def log_request(username: str, method: str, endpoint: str, body: str, status: str = "unknown"):
+
+    UserRequest.create(
+        username=username,
+        method=method,
+        endpoint=endpoint,
+        body=body,
+        status=status
+    )

@@ -71,6 +71,30 @@ def test_add_new_duty_admin(empty_database):
     assert Duty.select().count() == 1
     assert "Script and code" in Duty.get(Duty.duty_number == 1).description
 
+#  ----------------------------------------------------------------------------------------start validation tests------------------------------------
+def test_duty_description_can_contain_basic_punctuation(empty_database):
+    assert Duty.select().count() == 0
+    client.post(
+        "/api/duties",
+        json={"duty_number": 1, "description": "Script, and code. Then do a bit more high-quality scripting and coding."},
+        headers=admin_headers,
+    )
+    assert Duty.select().count() == 1
+    assert "Script, and code" in Duty.get(Duty.duty_number == 1).description
+
+def test_duty_description_cannot_contain_other_punctuation(empty_database):
+    assert Duty.select().count() == 0
+    response = client.post(
+        "/api/duties",
+        json={"duty_number": 1, "description": "Script & code"},
+        headers=admin_headers,
+    )
+    assert response.status_code == 422
+    assert Duty.select().count() == 0
+
+#  ----------------------------------------------------------------------------------------end validation tests------------------------------------
+
+
 
 def test_update_duty_user(full_database):
     duty_3 = Duty.get(Duty.duty_number == 3)

@@ -16,18 +16,18 @@ client = TestClient(app)
 # ----- welcome page -----
 
 
-def test_welcome_page_returns_message():
+def test_welcome_page_returns_message(full_database):
     response = client.get("/")
     assert response.status_code == 200
     assert "Please select" in response.text
 
 
-def test_welcome_page_returns_html_page():
+def test_welcome_page_returns_html_page(full_database):
     response = client.get("/")
     assert "<!DOCTYPE html>" in response.text
 
 
-def test_welcome_page_contains_links():
+def test_welcome_page_contains_links(full_database):
     response = client.get("/")
     assert "/coins" in response.text
     assert "/duties" in response.text

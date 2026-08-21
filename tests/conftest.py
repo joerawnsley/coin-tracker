@@ -7,6 +7,7 @@ from argon2 import PasswordHasher
 
 from src.database import db
 from src.database_models import Coin, Duty, User, UserRequest
+from src.limiter import limiter
 
 ph = PasswordHasher()
 dotenv.load_dotenv()
@@ -42,6 +43,11 @@ hashed_users = [
 
 
 # --------------- test fixtures -----------------
+@pytest.fixture(autouse=True)
+def disable_rate_limiter():
+    limiter.enabled = False
+    yield
+
 @pytest.fixture()
 def empty_database():
     # contains only users but no coins or duties
