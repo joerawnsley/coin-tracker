@@ -66,6 +66,12 @@ def test_data_types_in_coin(full_database):
     assert type(coin_3["isComplete"]) == bool
 
 
+def test_get_nonexistent_coin_returns_404(full_database):
+    response = client.get("/api/coins/does-not-exist")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Coin not found"}
+
+
 def test_list_duties_for_coin_user(full_database):
     client.put("/api/coins/deeper/add-duties", json=[10, 11, 12], headers=test_headers)
     response = client.get("/api/coins/deeper/list-duties")

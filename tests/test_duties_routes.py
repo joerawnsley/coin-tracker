@@ -51,6 +51,12 @@ def test_get_single_duty(full_database):
     assert type(duty_object) == dict
 
 
+def test_get_nonexistent_duty_returns_404(full_database):
+    response = client.get("/api/duties/9999")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Duty not found"}
+
+
 def test_add_new_duty_user(empty_database):
     assert Duty.select().count() == 0
     client.post(
