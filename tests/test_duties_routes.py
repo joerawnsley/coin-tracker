@@ -77,6 +77,14 @@ def test_add_new_duty_admin(empty_database):
     assert Duty.select().count() == 1
     assert "Script and code" in Duty.get(Duty.duty_number == 1).description
 
+
+def test_add_duplicate_duty_returns_409(full_database):
+    duty_data = {"duty_number": 3, "description": "Some other description"}
+    response = client.post("/api/duties", json=duty_data, headers=admin_headers)
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "A record with these details already exists"}
+
 #  ----------------------------------------------------------------------------------------start validation tests------------------------------------
 def test_duty_description_can_contain_basic_punctuation(empty_database):
     assert Duty.select().count() == 0

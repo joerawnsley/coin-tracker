@@ -47,24 +47,41 @@ Add a global exception handler for `peewee.DoesNotExist` in `src/app.py` so that
   - `GET /api/coins/{nonexistent-path}` -> expect `404`
   - `GET /api/duties/{nonexistent-number}` -> expect `404`
 
-### Step 2 - TODO
-Add a global exception handler for `peewee.IntegrityError` -> `409 Conflict`, covering:
-- Duplicate coin/duty creation (`add_coin`, `add_duty`).
-- Replace the existing ad-hoc `try/except IntegrityError` in `delete_coin` (currently returns 200 with a string body) with the same 409 behavior.
+### Step 2 - DONE
+Add a global exception handler for `peewee.IntegrityError` -> `409 Conflict`, covering duplicate coin/duty creation (`add_coin`, `add_duty`), with a generic message: `{"detail": "A record with these details already exists"}`.
 
-### Step 3 - TODO
-Fix `delete_coin` to return `404` when the coin doesn't exist, instead of silently reporting "Coin deleted" for zero rows affected. Fetch via `Coin.get(...)` first (letting `DoesNotExist` propagate to the Step 1 handler), then delete.
+**Note on `delete_coin`:** the original code relied on catching `IntegrityError` raised by a DB-level foreign key constraint when deleting a coin that still has duties attached. While implementing/testing this, we discovered that SQLite (used in the local `ltest` environment) has foreign key enforcement **off by default**, so that constraint was silently not enforced locally - deleting a coin with duties attached would succeed and leave orphaned rows in the coin-duty association table. This only worked as intended against Postgres (`rtest`/`prod`).
+
+Fixed by replacing the "attempt delete, catch DB error" approach with an explicit application-level check in `delete_coin`:
+```python
+selected_coin = Coin.get(Coin.coin_path == coin_path)  # 404 via Step 1 handler if missing
+
+if selected_coin.duties.count() > 0:
+    raise HTTPException(status_code=409, detail="must remove duties before deleting the coin")
+
+selected_coin.delete_instance()
+```
+This is portable across SQLite/Postgres and testable without depending on DB-specific constraint enforcement. As a side effect, this also fixes Step 3 below (`delete_coin` now 404s on a nonexistent `coin_path` via `Coin.get(...)`, instead of silently reporting "Coin deleted").
+
+Tests added:
+- `test_add_duplicate_coin_returns_409`
+- `test_add_duplicate_duty_returns_409`
+- `test_delete_coin_with_duties_attached_returns_409`
+- `test_delete_nonexistent_coin_returns_404`
+
+### Step 3 - DONE (as a byproduct of Step 2)
+`delete_coin` now returns `404` when the coin doesn't exist (via `Coin.get(...)` inside the Step 2 rewrite), instead of silently reporting "Coin deleted" for zero rows affected.
 
 ### Step 4 - TODO
 Review `coins_ui.py` call sites (`edit_coin_page`, `create_coin_submit`, `delete_coin_submit`, etc.) that call `coins_api` functions directly, to decide whether raised `DoesNotExist`/`IntegrityError` should be caught there for a friendlier UI experience (redirect / flash message) rather than surfacing the generic JSON error response.
 
-### Step 5 - TODO
-Add remaining tests:
-- DELETE `/api/coins/{nonexistent}` -> 404 (behavior change from current silent 200)
-- POST `/api/coins` with duplicate `coin_name`/`coin_path` -> 409 (currently 500)
-- POST `/api/duties` with duplicate `duty_number` -> 409 (currently 500)
-- PUT `.../add-duties` and `.../remove-duties` with nonexistent coin_path or duty number -> 404
-- DELETE `/api/coins/{path}` when it still has associated duties -> 409 (replaces old string-based check)
+### Step 5 - PARTIALLY DONE
+Remaining tests, tracked individually:
+- [x] DELETE `/api/coins/{nonexistent}` -> 404 (`test_delete_nonexistent_coin_returns_404`)
+- [x] POST `/api/coins` with duplicate `coin_name`/`coin_path` -> 409 (`test_add_duplicate_coin_returns_409`)
+- [x] POST `/api/duties` with duplicate `duty_number` -> 409 (`test_add_duplicate_duty_returns_409`)
+- [ ] PUT `.../add-duties` and `.../remove-duties` with nonexistent coin_path or duty number -> 404
+- [x] DELETE `/api/coins/{path}` when it still has associated duties -> 409 (`test_delete_coin_with_duties_attached_returns_409`)
 
 ### Step 6 - TODO
 Update `README.md` "Note on error handling and validation" section to remove the now-fixed known issues.

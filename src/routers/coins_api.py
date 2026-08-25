@@ -6,7 +6,6 @@ from fastapi.responses import (
     PlainTextResponse,
     )
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
-from peewee import IntegrityError
 
 from src.auth import authenticate_api_call, get_user_from_token
 from src.database_models import Coin, Duty
@@ -95,13 +94,18 @@ def delete_coin(coin_path,
                 detail="Invalid credentials or authorization",
             )  
     
-    try:
-        Coin.delete().where(Coin.coin_path == coin_path).execute()
-        log_request(username=user.username, method="DELETE", endpoint=f"/api/coins/{coin_path}", body="", status="success")
-        return "Coin deleted"
-    except IntegrityError:
+    selected_coin = Coin.get(Coin.coin_path == coin_path)
+
+    if selected_coin.duties.count() > 0:
         log_request(username=user.username, method="DELETE", endpoint=f"/api/coins/{coin_path}", body="", status="failure")
-        return "must remove associated duties before deleting coin"
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="must remove duties before deleting the coin",
+        )
+
+    selected_coin.delete_instance()
+    log_request(username=user.username, method="DELETE", endpoint=f"/api/coins/{coin_path}", body="", status="success")
+    return "Coin deleted"
 
 @router.put("/api/coins/{coin_path}/add-duties", response_class=JSONResponse)
 def add_duties_to_coin(

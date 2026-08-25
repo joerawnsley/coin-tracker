@@ -107,6 +107,17 @@ def test_add_coin_with_no_duties_to_empty_db(empty_database):
     assert response.status_code == 201
     assert Coin.select().where(Coin.coin_path == "deeper").first() is not None
 
+
+def test_add_duplicate_coin_returns_409(full_database):
+    coin_data = {
+        "coin_name": "Going Deeper",
+        "coin_path": "deeper",
+    }
+    response = client.post("/api/coins", json=coin_data, headers=admin_headers)
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "A record with these details already exists"}
+
 #  ----------------------------------------------------------------------------------------start validation tests------------------------------------
 def test_special_characters_not_allowed_in_coin_name(empty_database):
 
@@ -388,3 +399,20 @@ def test_delete_coin_admin_role(full_database):
         "Assemble",
     }
     assert "deleted" in response.text
+
+
+def test_delete_coin_with_duties_attached_returns_409(full_database):
+    client.put("/api/coins/security/add-duties", json=[1], headers=admin_headers)
+
+    response = client.delete("/api/coins/security", headers=admin_headers)
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "must remove duties before deleting the coin"}
+    assert Coin.select().where(Coin.coin_path == "security").first() is not None
+
+
+def test_delete_nonexistent_coin_returns_404(full_database):
+    response = client.delete("/api/coins/does-not-exist", headers=admin_headers)
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Coin not found"}

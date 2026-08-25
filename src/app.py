@@ -2,7 +2,7 @@ import os
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from peewee import DoesNotExist
+from peewee import DoesNotExist, IntegrityError
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -21,6 +21,19 @@ def not_found_handler(request: Request, exc: DoesNotExist):
     return JSONResponse(
         status_code=404,
         content={"detail": f"{model_name} not found"},
+    )
+
+
+@app.exception_handler(IntegrityError)
+def integrity_error_handler(request: Request, exc: IntegrityError):
+    # Generic fallback for unique-constraint violations (e.g. duplicate
+    # coin/duty creation). Routes that need a more specific message
+    # (e.g. deleting a coin that still has duties attached) should raise
+    # an HTTPException(status_code=409, ...) directly instead of letting
+    # the IntegrityError propagate here.
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "A record with these details already exists"},
     )
 
 if os.getenv("DB_ENVIRONMENT") == "prod":
