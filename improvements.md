@@ -85,3 +85,12 @@ Remaining tests, tracked individually:
 
 ### Step 6 - TODO
 Update `README.md` "Note on error handling and validation" section to remove the now-fixed known issues.
+
+### Step 7 - TODO
+Make `add_duties_to_coin` idempotent for already-associated duties, per user feedback from manual testing.
+
+Currently, adding a duty that's already associated with a coin triggers a unique-constraint violation on the through table, which is now caught by the Step 2 `IntegrityError` handler and returns a `409`. The desired behavior instead:
+- Adding a duty that's already associated with the coin -> silently do nothing (idempotent), not an error.
+- When a list of duty numbers is passed in, any that are already associated should be skipped/ignored, while any new ones in the list are still added. The whole call should not fail just because one item in the list was already present.
+
+Likely implementation: before calling `.add()`, check which of the requested duty numbers are already associated with the coin (e.g. via `selected_coin.duties` or a query against the through model) and only call `.add()` for the ones that aren't yet associated.
