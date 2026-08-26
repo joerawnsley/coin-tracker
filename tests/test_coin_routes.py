@@ -287,6 +287,24 @@ def test_add_duty_to_coin_admin(full_database):
     assert automate_duties == {1, 2, 3}
 
 
+def test_add_duties_to_nonexistent_coin_returns_404(full_database):
+    response = client.put(
+        "/api/coins/does-not-exist/add-duties", json=[1], headers=admin_headers
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Coin not found"}
+
+
+def test_add_nonexistent_duty_to_coin_returns_404(full_database):
+    response = client.put(
+        "/api/coins/deeper/add-duties", json=[9999], headers=admin_headers
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Duty not found"}
+
+
 def test_remove_duties_from_coin_user(full_database):
     houston = Coin.get(Coin.coin_name == "Houston, Prepare to Launch")
     duty_5 = Duty.get(Duty.duty_number == 5)
@@ -317,6 +335,15 @@ def test_remove_duties_from_coin_admin(full_database):
     houston = Coin.get(Coin.coin_name == "Houston, Prepare to Launch")
     houston_duties = {duty.duty_number for duty in houston.duties}
     assert houston_duties == {10}
+
+
+def test_remove_duties_from_nonexistent_coin_returns_404(full_database):
+    response = client.put(
+        "/api/coins/does-not-exist/remove-duties", json=[1], headers=admin_headers
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Coin not found"}
 
 
 def test_mark_coin_complete(full_database):

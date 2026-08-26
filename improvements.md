@@ -75,12 +75,12 @@ Tests added:
 ### Step 4 - TODO
 Review `coins_ui.py` call sites (`edit_coin_page`, `create_coin_submit`, `delete_coin_submit`, etc.) that call `coins_api` functions directly, to decide whether raised `DoesNotExist`/`IntegrityError` should be caught there for a friendlier UI experience (redirect / flash message) rather than surfacing the generic JSON error response.
 
-### Step 5 - PARTIALLY DONE
+### Step 5 - DONE
 Remaining tests, tracked individually:
 - [x] DELETE `/api/coins/{nonexistent}` -> 404 (`test_delete_nonexistent_coin_returns_404`)
 - [x] POST `/api/coins` with duplicate `coin_name`/`coin_path` -> 409 (`test_add_duplicate_coin_returns_409`)
 - [x] POST `/api/duties` with duplicate `duty_number` -> 409 (`test_add_duplicate_duty_returns_409`)
-- [ ] PUT `.../add-duties` and `.../remove-duties` with nonexistent coin_path or duty number -> 404
+- [x] PUT `.../add-duties` and `.../remove-duties` with nonexistent coin_path or duty number -> 404 (`test_add_duties_to_nonexistent_coin_returns_404`, `test_remove_duties_from_nonexistent_coin_returns_404`, `test_add_nonexistent_duty_to_coin_returns_404`) - already worked as a side effect of the Step 1 handler; these tests just lock the behavior in
 - [x] DELETE `/api/coins/{path}` when it still has associated duties -> 409 (`test_delete_coin_with_duties_attached_returns_409`)
 
 ### Step 6 - TODO
