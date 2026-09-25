@@ -228,3 +228,5 @@ The coins API validates that coin names, coin paths (the shortened form of a coi
 - There might be other, similar, error handling and validation issues
 
 These problems have been thought about and will be prioritised in the next update, but I haven't had time to properly test and implement the solution yet.
+
+<!-- testing status checks. delete later -->
